@@ -1,0 +1,1644 @@
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', sans-serif;
+  }
+
+  :root {
+    --bg: #070a13;
+    --surface: rgba(15, 23, 42, 0.6);
+    --surface2: rgba(30, 41, 59, 0.7);
+    --accent: #00f0ff;
+    --accent-hover: #00c4d1;
+    --danger: #ff0055;
+    --text: #f8fafc;
+    --muted: #94a3b8;
+    --border: rgba(0, 240, 255, 0.15);
+    --border-hl: rgba(0, 240, 255, 0.4);
+    --mono: 'JetBrains Mono', monospace;
+    --glow: 0 0 20px rgba(0, 240, 255, 0.2);
+    --glow-strong: 0 0 20px rgba(0, 240, 255, 0.5);
+    --shadow-lg: 0 20px 40px -10px rgba(0, 0, 0, 0.8);
+  }
+
+  html,
+  body {
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  body {
+    background-color: var(--bg);
+    background-image:
+      radial-gradient(circle at 15% 50%, rgba(0, 240, 255, 0.08) 0%, transparent 40%),
+      radial-gradient(circle at 85% 30%, rgba(0, 240, 255, 0.05) 0%, transparent 40%),
+      linear-gradient(to bottom, #070a13, #0a0f1d);
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+    color: var(--text);
+  }
+
+  .shell {
+    background: var(--surface);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    box-shadow: var(--shadow-lg), inset 0 0 0 1px var(--border);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100vh;
+    animation: fadeIn 0.8s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 28px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(0, 0, 0, 0.2);
+    flex-shrink: 0;
+  }
+
+  .brand {
+    font-family: var(--mono);
+    font-size: 15px;
+    color: var(--accent);
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-shadow: var(--glow);
+  }
+
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 12px var(--accent);
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite
+  }
+
+  @keyframes pulse {
+
+    0%,
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    50% {
+      opacity: .4;
+      transform: scale(0.8);
+    }
+  }
+
+  .topbar-right {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .topbar-right::before {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .main {
+    display: grid;
+    grid-template-columns: 240px 1fr 300px;
+    flex: 1;
+    overflow: hidden;
+    min-height: 0;
+  }
+
+  /* LEFT */
+  .left {
+    background: rgba(0, 0, 0, 0.15);
+    border-right: 1px solid var(--border);
+    padding: 16px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    overflow-y: auto;
+  }
+
+  .left::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .left::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 4px;
+  }
+
+  .sec-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 3px;
+    padding: 0 20px 10px;
+    text-transform: uppercase;
+    opacity: 0.8;
+  }
+
+  .part-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 20px;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 500;
+    width: 100%;
+    text-align: left;
+    border-left: 3px solid transparent;
+    transition: all .3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+  }
+
+  .part-btn::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 100%;
+    background: linear-gradient(90deg, rgba(0, 240, 255, 0.1), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .part-btn:hover {
+    color: var(--text);
+    padding-left: 26px;
+  }
+
+  .part-btn.active {
+    color: var(--accent);
+    border-left-color: var(--accent);
+    font-weight: 600;
+    background: rgba(0, 0, 0, 0.2);
+  }
+
+  .part-btn.active::after {
+    opacity: 1;
+  }
+
+  .part-btn .ico {
+    font-size: 18px;
+    width: 24px;
+    text-align: center;
+    opacity: 0.9;
+    filter: grayscale(1);
+    transition: all 0.3s;
+  }
+
+  .part-btn.active .ico {
+    filter: grayscale(0) drop-shadow(0 0 8px rgba(0, 240, 255, 0.6));
+    transform: scale(1.1);
+  }
+
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 12px 20px;
+    opacity: 0.5;
+  }
+
+  .slider-sec {
+    padding: 8px 20px 0;
+    flex-shrink: 0;
+  }
+
+  .sl-row {
+    margin-bottom: 12px;
+  }
+
+  .sl-row label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 6px;
+    letter-spacing: 0.5px;
+  }
+
+  .sl-row label span {
+    color: var(--accent);
+    font-family: var(--mono);
+    text-shadow: var(--glow);
+  }
+
+  input[type=range] {
+    width: 100%;
+    accent-color: var(--accent);
+    height: 4px;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 2px;
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.5);
+  }
+
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    background: var(--text);
+    border: 2px solid var(--accent);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: var(--glow);
+  }
+
+  input[type=range]::-webkit-slider-thumb:hover {
+    transform: scale(1.3);
+    background: var(--accent);
+    box-shadow: var(--glow-strong);
+  }
+
+  /* CENTER */
+  .center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 16px 24px;
+    background: radial-gradient(circle at center, rgba(0, 240, 255, 0.03) 0%, transparent 70%);
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .toolbar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 14px;
+    width: 100%;
+    max-width: 500px;
+    justify-content: center;
+    z-index: 10;
+  }
+
+  .tbtn {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 10px 20px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.3);
+    color: var(--muted);
+    cursor: pointer;
+    transition: all .2s ease;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    backdrop-filter: blur(4px);
+  }
+
+  .tbtn:hover {
+    border-color: var(--border-hl);
+    color: var(--text);
+    box-shadow: var(--glow);
+  }
+
+  .tbtn.on {
+    border-color: var(--accent);
+    color: var(--bg);
+    background: var(--accent);
+    box-shadow: var(--glow-strong);
+    text-shadow: none;
+  }
+
+  .tbtn.red {
+    border-color: rgba(255, 0, 85, 0.3);
+    color: var(--danger);
+  }
+
+  .tbtn.red:hover {
+    background: var(--danger);
+    color: #fff;
+    box-shadow: 0 0 16px rgba(255, 0, 85, 0.5);
+    border-color: var(--danger);
+  }
+
+  .tbtn#exportBtn {
+    border-color: var(--border-hl);
+    color: var(--accent);
+  }
+
+  .tbtn#exportBtn:hover {
+    background: rgba(0, 240, 255, 0.15);
+  }
+
+  .canvas-box {
+    width: min(380px, 45vw);
+    height: min(460px, 55vh);
+    border: 1px solid var(--border-hl);
+    border-radius: 16px;
+    background: rgba(0, 0, 0, 0.4);
+    position: relative;
+    overflow: hidden;
+    box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.8), var(--glow);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .canvas-box::before,
+  .canvas-box::after {
+    content: '';
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    border: 2px solid var(--accent);
+    z-index: 5;
+    pointer-events: none;
+    opacity: 0.5;
+  }
+
+  .canvas-box::before {
+    top: 16px;
+    left: 16px;
+    border-right: none;
+    border-bottom: none;
+  }
+
+  .canvas-box::after {
+    bottom: 16px;
+    right: 16px;
+    border-left: none;
+    border-top: none;
+  }
+
+  .grid-bg {
+    position: absolute;
+    inset: 0;
+    background-image: linear-gradient(rgba(0, 240, 255, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 240, 255, 0.05) 1px, transparent 1px);
+    background-size: 20px 20px;
+    background-position: center center;
+  }
+
+  .scan {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    animation: scan 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    opacity: .6;
+    box-shadow: 0 0 15px var(--accent);
+    z-index: 3;
+  }
+
+  @keyframes scan {
+    0% {
+      top: -10%
+    }
+
+    50% {
+      top: 110%
+    }
+
+    100% {
+      top: -10%
+    }
+  }
+
+  #facesvg {
+    width: 80%;
+    height: 80%;
+    filter: drop-shadow(0 0 10px rgba(0, 240, 255, 0.3));
+    z-index: 2;
+  }
+
+  .canvas-info {
+    display: flex;
+    gap: 16px;
+    margin-top: 14px;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    background: rgba(0, 0, 0, 0.4);
+    padding: 8px 18px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    backdrop-filter: blur(4px);
+    letter-spacing: 1px;
+  }
+
+  .canvas-info span {
+    color: var(--accent);
+    font-weight: 700;
+    text-shadow: var(--glow);
+  }
+
+  /* RIGHT */
+  .right {
+    background: rgba(0, 0, 0, 0.15);
+    border-left: 1px solid var(--border);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  .right::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .right::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 4px;
+  }
+
+  .r-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 3px;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    opacity: 0.8;
+  }
+
+  .variants-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .variant-card {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 8px;
+    cursor: pointer;
+    transition: all .3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .variant-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 0;
+    background: linear-gradient(180deg, rgba(0, 240, 255, 0.1), transparent);
+    transition: height 0.3s;
+    z-index: 0;
+  }
+
+  .variant-card:hover {
+    border-color: var(--border-hl);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+  }
+
+  .variant-card:hover::before {
+    height: 100%;
+  }
+
+  .variant-card.selected {
+    border-color: var(--accent);
+    background: rgba(0, 240, 255, 0.05);
+    box-shadow: 0 0 0 1px var(--accent), var(--glow);
+  }
+
+  .variant-card svg {
+    width: 64px;
+    height: 40px;
+    z-index: 1;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+  }
+
+  .variant-card .vname {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text);
+    text-align: center;
+    z-index: 1;
+    letter-spacing: 0.5px;
+  }
+
+  .variant-card.selected .vname {
+    color: var(--accent);
+    text-shadow: var(--glow);
+  }
+
+  .run-btn {
+    width: 100%;
+    padding: 13px;
+    border-radius: 8px;
+    background: var(--accent);
+    color: var(--bg);
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    border: none;
+    cursor: pointer;
+    transition: all .3s ease;
+    box-shadow: 0 4px 20px rgba(0, 240, 255, 0.4);
+    text-transform: uppercase;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .run-btn::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    transform: skewX(-20deg);
+    transition: 0.5s;
+  }
+
+  .run-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(0, 240, 255, 0.6);
+    background: var(--accent-hover);
+  }
+
+  .run-btn:hover::after {
+    left: 150%;
+  }
+
+  .run-btn:active {
+    transform: translateY(1px);
+  }
+
+  .prog-wrap {
+    margin-top: 6px;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    backdrop-filter: blur(4px);
+  }
+
+  .prog-label {
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text);
+    margin-bottom: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+  }
+
+  .prog-track {
+    height: 4px;
+    background: rgba(0, 0, 0, 0.6);
+    border-radius: 2px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .prog-fill {
+    height: 100%;
+    border-radius: 2px;
+    background: var(--accent);
+    width: 0%;
+    transition: width .4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: var(--glow-strong);
+    position: relative;
+  }
+
+  .prog-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 20px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.8));
+    filter: blur(2px);
+  }
+
+  /* === MODAL === */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .3s ease;
+    padding: 20px;
+  }
+
+  .modal-overlay.open {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .modal {
+    background: rgba(7, 10, 19, 0.98);
+    border: 1px solid var(--border-hl);
+    border-radius: 20px;
+    max-width: 580px;
+    width: 100%;
+    position: relative;
+    box-shadow: 0 40px 100px rgba(0, 0, 0, 0.95), 0 0 0 1px var(--border), 0 0 60px rgba(0, 240, 255, 0.08);
+    transform: translateY(40px) scale(0.93);
+    transition: transform .4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity .3s ease;
+    opacity: 0;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  .modal::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .modal::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 4px;
+  }
+
+  .modal-overlay.open .modal {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+
+  /* Modal Header */
+  .modal-header {
+    background: linear-gradient(135deg, rgba(0, 240, 255, 0.12) 0%, rgba(0, 0, 0, 0.4) 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 24px 28px 20px;
+    border-radius: 20px 20px 0 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .modal-header::before {
+    content: 'LFIM // IDENTITY FILE';
+    position: absolute;
+    top: 12px;
+    right: 16px;
+    font-family: var(--mono);
+    font-size: 9px;
+    font-weight: 700;
+    color: rgba(0, 240, 255, 0.35);
+    letter-spacing: 2px;
+  }
+
+  .modal-header-grid {
+    display: flex;
+    gap: 22px;
+    align-items: flex-start;
+  }
+
+  .modal-photo-wrap {
+    flex-shrink: 0;
+    position: relative;
+  }
+
+  .modal-photo {
+    width: 110px;
+    height: 110px;
+    border-radius: 12px;
+    object-fit: cover;
+    border: 2px solid var(--accent);
+    box-shadow: 0 0 30px rgba(0, 240, 255, 0.35), 0 4px 20px rgba(0, 0, 0, 0.8);
+  }
+
+  .modal-photo-scan {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    animation: scan 3s ease-in-out infinite;
+    opacity: .7;
+    z-index: 2;
+    top: 0;
+  }
+
+  .modal-badges {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+    flex-wrap: wrap;
+  }
+
+  .badge {
+    font-family: var(--mono);
+    font-size: 8px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 3px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+
+  .badge-rank {
+    background: rgba(0, 240, 255, 0.15);
+    color: var(--accent);
+    border: 1px solid rgba(0, 240, 255, 0.3);
+  }
+
+  .badge-db {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--muted);
+    border: 1px solid var(--border);
+  }
+
+  .modal-header-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .modal-id-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    font-weight: 700;
+    color: rgba(0, 240, 255, 0.5);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .modal-name {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--text);
+    text-transform: capitalize;
+    line-height: 1.2;
+    margin-bottom: 10px;
+    word-break: break-word;
+  }
+
+  .modal-status-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .status-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #00ff88;
+    box-shadow: 0 0 8px #00ff88;
+    animation: pulse 2s infinite;
+  }
+
+  .status-text {
+    font-size: 11px;
+    font-weight: 600;
+    color: #00ff88;
+    letter-spacing: 1px;
+  }
+
+  .modal-id-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 2px;
+  }
+
+  /* Modal Body */
+  .modal-body {
+    padding: 24px 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  /* Confidence section */
+  .conf-section {
+    background: rgba(0, 240, 255, 0.04);
+    border: 1px solid rgba(0, 240, 255, 0.15);
+    border-radius: 12px;
+    padding: 18px 20px;
+  }
+
+  .conf-title {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+
+  .conf-big-val {
+    font-family: var(--mono);
+    font-size: 40px;
+    font-weight: 800;
+    color: var(--accent);
+    text-shadow: 0 0 30px rgba(0, 240, 255, 0.6);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .conf-sub {
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 14px;
+  }
+
+  .conf-track {
+    height: 8px;
+    background: rgba(0, 0, 0, 0.6);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .conf-fill {
+    height: 100%;
+    border-radius: 4px;
+    background: linear-gradient(90deg, #005f6b, var(--accent));
+    transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 0 12px rgba(0, 240, 255, 0.5);
+  }
+
+  /* Stats grid */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+  }
+
+  .stat-box {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 12px;
+    text-align: center;
+    transition: border-color .2s;
+  }
+
+  .stat-box:hover {
+    border-color: var(--border-hl);
+  }
+
+  .stat-box-val {
+    font-family: var(--mono);
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .stat-box-label {
+    font-size: 9px;
+    font-weight: 700;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  /* Biometric section */
+  .bio-title {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .bio-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .bio-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .bio-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 14px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+    border: 1px solid var(--border);
+  }
+
+  .bio-label {
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 500;
+  }
+
+  .bio-val {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text);
+    font-weight: 600;
+    text-align: right;
+    max-width: 60%;
+    word-break: break-all;
+  }
+
+  /* Footer */
+  .modal-footer {
+    padding: 16px 28px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-radius: 0 0 20px 20px;
+    background: rgba(0, 0, 0, 0.3);
+  }
+
+  .modal-close-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 700;
+    padding: 8px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    transition: all .2s;
+  }
+
+  .modal-close-btn:hover {
+    border-color: var(--border-hl);
+    color: var(--text);
+  }
+
+  .modal-timestamp {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+  }
+</style>
+
+<div class="shell">
+  <div class="topbar">
+    <div class="brand">
+      <div class="dot"></div>Latent-space Facial Identity Mapping System
+    </div>
+    <div class="topbar-right">INTERACTIVE PARTS MODE</div>
+  </div>
+  <div class="main">
+
+
+    <!-- LEFT -->
+    <div class="left">
+      <div class="sec-label">FACE PARTS</div>
+      <button class="part-btn active" onclick="selectPart('eyes',this)"><span class="ico">👁</span>Eyes</button>
+      <button class="part-btn" onclick="selectPart('brows',this)"><span class="ico">〰</span>Eyebrows</button>
+      <button class="part-btn" onclick="selectPart('nose',this)"><span class="ico">👃</span>Nose</button>
+      <button class="part-btn" onclick="selectPart('mouth',this)"><span class="ico">👄</span>Mouth</button>
+      <button class="part-btn" onclick="selectPart('ears',this)"><span class="ico">👂</span>Ears</button>
+      <button class="part-btn" onclick="selectPart('jaw',this)"><span class="ico">🫦</span>Jawline</button>
+      <button class="part-btn" onclick="selectPart('hair',this)"><span class="ico">💇</span>Hair</button>
+      <div class="divider"></div>
+      <div class="slider-sec">
+        <div class="sec-label" style="padding:0 0 8px">ADJUST</div>
+        <div class="sl-row">
+          <label>Scale <span id="sv1">100</span></label>
+          <input type="range" min="60" max="140" value="100" oninput="applySlider('scale',this.value)">
+        </div>
+        <div class="sl-row">
+          <label>Vertical <span id="sv2">0</span></label>
+          <input type="range" min="-30" max="30" value="0" oninput="applySlider('vert',this.value)">
+        </div>
+        <div class="sl-row">
+          <label>Width <span id="sv3">100</span></label>
+          <input type="range" min="60" max="140" value="100" oninput="applySlider('width',this.value)">
+        </div>
+      </div>
+    </div>
+
+    <!-- CENTER CANVAS -->
+    <div class="center">
+      <div class="toolbar">
+        <button class="tbtn on">COMPOSITE</button>
+        <button class="tbtn">LANDMARKS</button>
+        <div style="flex:1"></div>
+        <button class="tbtn red" onclick="resetFace()">RESET</button>
+        <button class="tbtn" id="exportBtn" onclick="exportComposite()">EXPORT</button>
+      </div>
+      <div class="canvas-box">
+        <div class="grid-bg"></div>
+        <div class="scan"></div>
+        <svg id="facesvg" viewBox="0 0 320 400" xmlns="http://www.w3.org/2000/svg">
+          <!-- Head -->
+          <ellipse id="head" cx="160" cy="210" rx="105" ry="135" stroke="#00f0ff" stroke-width="1.5"
+            stroke-dasharray="5 4" fill="rgba(0,240,255,0.03)" />
+          <!-- Jaw -->
+          <g id="jaw-group">
+            <path id="jaw" d="M80 280 Q160 340 240 280" stroke="#00f0ff" stroke-width="1.2" fill="none"
+              stroke-linecap="round" />
+          </g>
+          <!-- Hair -->
+          <g id="hair-group">
+            <path id="hair" d="M58 180 Q70 70 160 58 Q250 70 262 180" stroke="#00f0ff" stroke-width="1.5"
+              fill="rgba(0,240,255,0.06)" stroke-linecap="round" />
+          </g>
+          <!-- Ears -->
+          <g id="ears-group">
+            <path id="ear-l" d="M55 185 Q44 205 55 228" stroke="#00f0ff" stroke-width="1.5" fill="none"
+              stroke-linecap="round" />
+            <path id="ear-r" d="M265 185 Q276 205 265 228" stroke="#00f0ff" stroke-width="1.5" fill="none"
+              stroke-linecap="round" />
+          </g>
+          <!-- Brows -->
+          <g id="brows-group">
+            <path id="brow-l" d="M100 145 Q122 136 144 145" stroke="#00f0ff" stroke-width="2" fill="none"
+              stroke-linecap="round" />
+            <path id="brow-r" d="M176 145 Q198 136 220 145" stroke="#00f0ff" stroke-width="2" fill="none"
+              stroke-linecap="round" />
+          </g>
+          <!-- Eyes -->
+          <g id="eyes-group">
+            <ellipse id="eye-l" cx="122" cy="168" rx="24" ry="13" stroke="#00f0ff" stroke-width="1.5"
+              fill="rgba(0,240,255,0.08)" />
+            <circle cx="122" cy="168" r="8" fill="#00f0ff" opacity=".5" />
+            <circle cx="122" cy="168" r="3.5" fill="#0a0d12" />
+            <ellipse id="eye-r" cx="198" cy="168" rx="24" ry="13" stroke="#00f0ff" stroke-width="1.5"
+              fill="rgba(0,240,255,0.08)" />
+            <circle cx="198" cy="168" r="8" fill="#00f0ff" opacity=".5" />
+            <circle cx="198" cy="168" r="3.5" fill="#0a0d12" />
+          </g>
+          <!-- Nose -->
+          <g id="nose-group">
+            <path id="nose" d="M160 188 L148 228 Q160 234 172 228 L160 188Z" stroke="#00f0ff" stroke-width="1.2"
+              fill="rgba(0,240,255,0.05)" stroke-linejoin="round" />
+          </g>
+          <!-- Mouth -->
+          <g id="mouth-group">
+            <path id="mouth-top" d="M132 262 Q160 252 188 262" stroke="#00f0ff" stroke-width="1" fill="none"
+              stroke-linecap="round" />
+            <path id="mouth-bot" d="M132 262 Q160 280 188 262" stroke="#00f0ff" stroke-width="1.5"
+              fill="rgba(0,240,255,0.05)" stroke-linecap="round" />
+          </g>
+          <!-- Guide lines -->
+          <line x1="50" y1="168" x2="270" y2="168" stroke="#00f0ff" stroke-width="0.4" opacity=".15" />
+          <line x1="50" y1="228" x2="270" y2="228" stroke="#00f0ff" stroke-width="0.4" opacity=".15" />
+          <line x1="160" y1="50" x2="160" y2="360" stroke="#00f0ff" stroke-width="0.4" opacity=".15" />
+        </svg>
+      </div>
+      <div class="canvas-info">PART: <span id="cur-part">EYES</span> &nbsp;|&nbsp; VARIANT: <span id="cur-var">1 /
+          4</span> &nbsp;|&nbsp; LANDMARKS: <span>68</span></div>
+    </div>
+
+    <!-- RIGHT: VARIANT PICKER -->
+    <div class="right">
+      <div>
+        <div class="r-label">CHOOSE VARIANT</div>
+        <div class="variants-grid" id="variants-grid"></div>
+      </div>
+      <div>
+        <div class="r-label">RUN MATCH</div>
+        <button class="run-btn" onclick="runMatch()">IDENTIFY SUSPECT</button>
+        <div class="prog-wrap">
+          <div class="prog-label"><span>PROCESSING</span><span id="ppct">—</span></div>
+          <div class="prog-track">
+            <div class="prog-fill" id="pfill"></div>
+          </div>
+        </div>
+        <div id="match-results" style="margin-top:20px; display:flex; flex-direction:column; gap:12px;"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- PROFILE MODAL -->
+<div class="modal-overlay" id="profileModal" onclick="closeModal(event)">
+  <div class="modal" id="modalBox">
+
+    <!-- Header -->
+    <div class="modal-header">
+      <div class="modal-header-grid">
+        <div class="modal-photo-wrap">
+          <div class="modal-photo-scan"></div>
+          <img id="modalPhoto" class="modal-photo" src="" alt="Suspect Photo">
+          <div class="modal-badges" id="modalBadges"></div>
+        </div>
+        <div class="modal-header-info">
+          <div class="modal-id-label">Subject Record</div>
+          <div class="modal-name" id="modalName"></div>
+          <div class="modal-status-row">
+            <div class="status-dot"></div>
+            <div class="status-text">MATCH FOUND</div>
+          </div>
+          <div class="modal-id-num" id="modalIdNum"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Body -->
+    <div class="modal-body">
+
+      <!-- Confidence -->
+      <div class="conf-section">
+        <div class="conf-title">Biometric Confidence Score</div>
+        <div class="conf-big-val" id="modalConf"></div>
+        <div class="conf-sub" id="modalConfSub"></div>
+        <div class="conf-track">
+          <div class="conf-fill" id="modalConfFill" style="width:0%"></div>
+        </div>
+      </div>
+
+      <!-- Stats row -->
+      <div class="stats-grid">
+        <div class="stat-box">
+          <div class="stat-box-val" id="s-rank"></div>
+          <div class="stat-box-label">Rank</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-box-val" id="s-dist"></div>
+          <div class="stat-box-label">Distance</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-box-val" id="s-enc">128-D</div>
+          <div class="stat-box-label">Encoding</div>
+        </div>
+      </div>
+
+      <!-- Biometric Details -->
+      <div class="bio-section">
+        <div class="bio-title">Identity Details</div>
+        <div class="bio-rows">
+          <div class="bio-row"><span class="bio-label">Full Name</span><span class="bio-val" id="b-name"></span></div>
+          <div class="bio-row"><span class="bio-label">Match Confidence</span><span class="bio-val" id="b-conf"></span>
+          </div>
+          <div class="bio-row"><span class="bio-label">Euclidean Distance</span><span class="bio-val"
+              id="b-dist"></span></div>
+          <div class="bio-row"><span class="bio-label">Similarity Index</span><span class="bio-val" id="b-sim"></span>
+          </div>
+          <div class="bio-row"><span class="bio-label">Dataset Source</span><span class="bio-val">LFW (Labeled Faces in
+              the Wild)</span></div>
+          <div class="bio-row"><span class="bio-label">Record File</span><span class="bio-val" id="b-file"></span></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="modal-footer">
+      <div class="modal-timestamp" id="modalTs"></div>
+      <button class="modal-close-btn" onclick="document.getElementById('profileModal').classList.remove('open')">Close
+        Record</button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const PARTS = {
+    eyes: {
+      label: 'EYES', cur: 0,
+      variants: [
+        {
+          name: 'Almond', draw: s => {
+            s.querySelectorAll('#eyes-group ellipse').forEach((e, i) => { e.setAttribute('ry', '13'); e.setAttribute('rx', '24') });
+          }
+        },
+        {
+          name: 'Round', draw: s => {
+            s.querySelectorAll('#eyes-group ellipse').forEach(e => { e.setAttribute('ry', '17'); e.setAttribute('rx', '17') });
+          }
+        },
+        {
+          name: 'Narrow', draw: s => {
+            s.querySelectorAll('#eyes-group ellipse').forEach(e => { e.setAttribute('ry', '8'); e.setAttribute('rx', '26') });
+          }
+        },
+        {
+          name: 'Wide-set', draw: s => {
+            s.querySelector('#eye-l').setAttribute('cx', '108');
+            s.querySelector('#eye-r').setAttribute('cx', '212');
+            s.querySelectorAll('#eyes-group ellipse').forEach(e => { e.setAttribute('ry', '13'); e.setAttribute('rx', '24') });
+          }
+        },
+      ]
+    },
+    brows: {
+      label: 'BROWS', cur: 0,
+      variants: [
+        {
+          name: 'Arched', draw: s => {
+            s.querySelector('#brow-l').setAttribute('d', 'M100 145 Q122 136 144 145');
+            s.querySelector('#brow-r').setAttribute('d', 'M176 145 Q198 136 220 145');
+          }
+        },
+        {
+          name: 'Straight', draw: s => {
+            s.querySelector('#brow-l').setAttribute('d', 'M100 142 Q122 140 144 142');
+            s.querySelector('#brow-r').setAttribute('d', 'M176 142 Q198 140 220 142');
+          }
+        },
+        {
+          name: 'Bushy', draw: s => {
+            s.querySelector('#brow-l').setAttribute('d', 'M98 148 Q122 133 146 148');
+            s.querySelector('#brow-r').setAttribute('d', 'M174 148 Q198 133 222 148');
+            s.querySelectorAll('#brows-group path').forEach(p => p.setAttribute('stroke-width', '4'));
+          }
+        },
+        {
+          name: 'Thin', draw: s => {
+            s.querySelector('#brow-l').setAttribute('d', 'M104 143 Q122 138 140 143');
+            s.querySelector('#brow-r').setAttribute('d', 'M180 143 Q198 138 216 143');
+            s.querySelectorAll('#brows-group path').forEach(p => p.setAttribute('stroke-width', '1'));
+          }
+        },
+      ]
+    },
+    nose: {
+      label: 'NOSE', cur: 0,
+      variants: [
+        {
+          name: 'Straight', draw: s => {
+            s.querySelector('#nose').setAttribute('d', 'M160 188 L148 228 Q160 234 172 228 L160 188Z');
+          }
+        },
+        {
+          name: 'Button', draw: s => {
+            s.querySelector('#nose').setAttribute('d', 'M155 200 Q148 220 150 230 Q160 236 170 230 Q172 220 165 200 Q160 195 155 200Z');
+          }
+        },
+        {
+          name: 'Wide', draw: s => {
+            s.querySelector('#nose').setAttribute('d', 'M160 188 L138 228 Q160 238 182 228 L160 188Z');
+          }
+        },
+        {
+          name: 'Narrow', draw: s => {
+            s.querySelector('#nose').setAttribute('d', 'M160 188 L154 228 Q160 232 166 228 L160 188Z');
+          }
+        },
+      ]
+    },
+    mouth: {
+      label: 'MOUTH', cur: 0,
+      variants: [
+        {
+          name: 'Neutral', draw: s => {
+            s.querySelector('#mouth-top').setAttribute('d', 'M132 262 Q160 252 188 262');
+            s.querySelector('#mouth-bot').setAttribute('d', 'M132 262 Q160 280 188 262');
+          }
+        },
+        {
+          name: 'Smile', draw: s => {
+            s.querySelector('#mouth-top').setAttribute('d', 'M128 258 Q160 248 192 258');
+            s.querySelector('#mouth-bot').setAttribute('d', 'M128 258 Q160 290 192 258');
+          }
+        },
+        {
+          name: 'Thin lips', draw: s => {
+            s.querySelector('#mouth-top').setAttribute('d', 'M138 262 Q160 256 182 262');
+            s.querySelector('#mouth-bot').setAttribute('d', 'M138 262 Q160 270 182 262');
+          }
+        },
+        {
+          name: 'Full lips', draw: s => {
+            s.querySelector('#mouth-top').setAttribute('d', 'M125 258 Q160 244 195 258');
+            s.querySelector('#mouth-bot').setAttribute('d', 'M125 258 Q160 288 195 258');
+          }
+        },
+      ]
+    },
+    ears: {
+      label: 'EARS', cur: 0,
+      variants: [
+        {
+          name: 'Normal', draw: s => {
+            s.querySelector('#ear-l').setAttribute('d', 'M55 185 Q44 205 55 228');
+            s.querySelector('#ear-r').setAttribute('d', 'M265 185 Q276 205 265 228');
+          }
+        },
+        {
+          name: 'Large', draw: s => {
+            s.querySelector('#ear-l').setAttribute('d', 'M55 180 Q36 206 55 234');
+            s.querySelector('#ear-r').setAttribute('d', 'M265 180 Q284 206 265 234');
+          }
+        },
+        {
+          name: 'Small', draw: s => {
+            s.querySelector('#ear-l').setAttribute('d', 'M58 193 Q50 205 58 220');
+            s.querySelector('#ear-r').setAttribute('d', 'M262 193 Q270 205 262 220');
+          }
+        },
+        {
+          name: 'Protruding', draw: s => {
+            s.querySelector('#ear-l').setAttribute('d', 'M60 185 Q30 205 60 228');
+            s.querySelector('#ear-r').setAttribute('d', 'M260 185 Q290 205 260 228');
+          }
+        },
+      ]
+    },
+    jaw: {
+      label: 'JAWLINE', cur: 0,
+      variants: [
+        { name: 'Soft', draw: s => { s.querySelector('#jaw').setAttribute('d', 'M80 280 Q160 340 240 280') } },
+        { name: 'Square', draw: s => { s.querySelector('#jaw').setAttribute('d', 'M80 275 L80 310 Q160 340 240 310 L240 275') } },
+        { name: 'Pointed', draw: s => { s.querySelector('#jaw').setAttribute('d', 'M80 270 Q160 360 240 270') } },
+        { name: 'Round', draw: s => { s.querySelector('#jaw').setAttribute('d', 'M90 265 Q160 345 230 265') } },
+      ]
+    },
+    hair: {
+      label: 'HAIR', cur: 0,
+      variants: [
+        { name: 'Short', draw: s => { s.querySelector('#hair').setAttribute('d', 'M58 180 Q70 70 160 58 Q250 70 262 180') } },
+        { name: 'Long', draw: s => { s.querySelector('#hair').setAttribute('d', 'M58 180 Q50 60 160 45 Q270 60 262 180 Q260 250 250 320 Q160 350 70 320 Q60 250 58 180Z') } },
+        { name: 'Bald', draw: s => { s.querySelector('#hair').setAttribute('d', 'M58 180 Q160 165 262 180') } },
+        { name: 'Curly', draw: s => { s.querySelector('#hair').setAttribute('d', 'M58 180 Q55 110 80 75 Q100 50 130 48 Q160 45 190 48 Q220 50 240 75 Q265 110 262 180 Q240 155 220 165 Q200 148 180 162 Q160 148 140 162 Q120 148 100 165 Q80 155 58 180Z') } },
+      ]
+    },
+  };
+
+  let activePart = 'eyes';
+  const svg = document.getElementById('facesvg');
+
+  function selectPart(part, btn) {
+    activePart = part;
+    document.querySelectorAll('.part-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('cur-part').textContent = PARTS[part].label;
+
+    const adj = PARTS[part].adj || { s: 100, v: 0, w: 100 };
+    PARTS[part].adj = adj;
+    const ranges = document.querySelectorAll('input[type=range]');
+    ranges[0].value = adj.s; document.getElementById('sv1').textContent = adj.s;
+    ranges[1].value = adj.v; document.getElementById('sv2').textContent = adj.v;
+    ranges[2].value = adj.w; document.getElementById('sv3').textContent = adj.w;
+
+    renderVariants(part);
+  }
+
+  function renderVariants(part) {
+    const grid = document.getElementById('variants-grid');
+    const p = PARTS[part];
+    grid.innerHTML = '';
+    p.variants.forEach((v, i) => {
+      const card = document.createElement('div');
+      card.className = 'variant-card' + (p.cur === i ? ' selected' : '');
+      const miniSvg = buildMiniSvg(part, i);
+      card.innerHTML = miniSvg + `<div class="vname">${v.name}</div>`;
+      card.onclick = () => applyVariant(part, i);
+      grid.appendChild(card);
+    });
+    document.getElementById('cur-var').textContent = (p.cur + 1) + ' / ' + p.variants.length;
+  }
+
+  function buildMiniSvg(part, idx) {
+    const defs = {
+      eyes: ['<ellipse cx="22" cy="22" rx="16" ry="9" stroke="#00f0ff" stroke-width="1.5" fill="rgba(0,240,255,0.1)"/><circle cx="22" cy="22" r="5" fill="#00f0ff" opacity=".6"/><ellipse cx="54" cy="22" rx="16" ry="9" stroke="#00f0ff" stroke-width="1.5" fill="rgba(0,240,255,0.1)"/><circle cx="54" cy="22" r="5" fill="#00f0ff" opacity=".6"/>',
+        '<ellipse cx="22" cy="22" rx="12" ry="12" stroke="#00f0ff" stroke-width="1.5" fill="rgba(0,240,255,0.1)"/><circle cx="22" cy="22" r="5" fill="#00f0ff" opacity=".6"/><ellipse cx="54" cy="22" rx="12" ry="12" stroke="#00f0ff" stroke-width="1.5" fill="rgba(0,240,255,0.1)"/><circle cx="54" cy="22" r="5" fill="#00f0ff" opacity=".6"/>',
+        '<ellipse cx="22" cy="22" rx="18" ry="6" stroke="#00f0ff" stroke-width="1.5" fill="rgba(0,240,255,0.1)"/><circle cx="22" cy="22" r="4" fill="#00f0ff" opacity=".6"/><ellipse cx="54" cy="22" rx="18" ry="6" stroke="#00f0ff" stroke-width="1.5" fill="rgba(0,240,255,0.1)"/><circle cx="54" cy="22" r="4" fill="#00f0ff" opacity=".6"/>',
+        '<ellipse cx="15" cy="22" rx="12" ry="9" stroke="#00f0ff" stroke-width="1.5" fill="rgba(0,240,255,0.1)"/><circle cx="15" cy="22" r="5" fill="#00f0ff" opacity=".6"/><ellipse cx="61" cy="22" rx="12" ry="9" stroke="#00f0ff" stroke-width="1.5" fill="rgba(0,240,255,0.1)"/><circle cx="61" cy="22" r="5" fill="#00f0ff" opacity=".6"/>'],
+      brows: ['<path d="M8 28 Q22 18 36 28" stroke="#00f0ff" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M40 28 Q54 18 68 28" stroke="#00f0ff" stroke-width="2" fill="none" stroke-linecap="round"/>',
+        '<path d="M8 24 Q22 22 36 24" stroke="#00f0ff" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M40 24 Q54 22 68 24" stroke="#00f0ff" stroke-width="2" fill="none" stroke-linecap="round"/>',
+        '<path d="M6 30 Q22 14 38 30" stroke="#00f0ff" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M38 30 Q54 14 70 30" stroke="#00f0ff" stroke-width="4" fill="none" stroke-linecap="round"/>',
+        '<path d="M12 24 Q22 20 32 24" stroke="#00f0ff" stroke-width="1" fill="none" stroke-linecap="round"/><path d="M44 24 Q54 20 64 24" stroke="#00f0ff" stroke-width="1" fill="none" stroke-linecap="round"/>'],
+      nose: ['<path d="M38 8 L30 34 Q38 38 46 34 L38 8Z" stroke="#00f0ff" stroke-width="1.2" fill="rgba(0,240,255,0.07)" stroke-linejoin="round"/>',
+        '<path d="M36 14 Q30 26 31 34 Q38 38 45 34 Q46 26 40 14 Q38 10 36 14Z" stroke="#00f0ff" stroke-width="1.2" fill="rgba(0,240,255,0.07)"/>',
+        '<path d="M38 8 L22 34 Q38 42 54 34 L38 8Z" stroke="#00f0ff" stroke-width="1.2" fill="rgba(0,240,255,0.07)" stroke-linejoin="round"/>',
+        '<path d="M38 8 L34 34 Q38 37 42 34 L38 8Z" stroke="#00f0ff" stroke-width="1.2" fill="rgba(0,240,255,0.07)" stroke-linejoin="round"/>'],
+      mouth: ['<path d="M16 18 Q38 10 60 18" stroke="#00f0ff" stroke-width="1" fill="none" stroke-linecap="round"/><path d="M16 18 Q38 32 60 18" stroke="#00f0ff" stroke-width="1.5" fill="rgba(0,240,255,0.07)" stroke-linecap="round"/>',
+        '<path d="M12 16 Q38 6 64 16" stroke="#00f0ff" stroke-width="1" fill="none" stroke-linecap="round"/><path d="M12 16 Q38 36 64 16" stroke="#00f0ff" stroke-width="1.5" fill="rgba(0,240,255,0.07)" stroke-linecap="round"/>',
+        '<path d="M20 20 Q38 14 56 20" stroke="#00f0ff" stroke-width="1" fill="none" stroke-linecap="round"/><path d="M20 20 Q38 28 56 20" stroke="#00f0ff" stroke-width="1.5" fill="rgba(0,240,255,0.07)" stroke-linecap="round"/>',
+        '<path d="M10 16 Q38 4 66 16" stroke="#00f0ff" stroke-width="1" fill="none" stroke-linecap="round"/><path d="M10 16 Q38 38 66 16" stroke="#00f0ff" stroke-width="1.5" fill="rgba(0,240,255,0.07)" stroke-linecap="round"/>'],
+      ears: ['<path d="M30 8 Q18 22 30 38" stroke="#00f0ff" stroke-width="1.5" fill="none" stroke-linecap="round"/>',
+        '<path d="M30 5 Q12 22 30 42" stroke="#00f0ff" stroke-width="1.5" fill="none" stroke-linecap="round"/>',
+        '<path d="M30 14 Q22 22 30 32" stroke="#00f0ff" stroke-width="1.5" fill="none" stroke-linecap="round"/>',
+        '<path d="M34 8 Q8 22 34 38" stroke="#00f0ff" stroke-width="1.5" fill="none" stroke-linecap="round"/>'],
+      jaw: ['<path d="M8 18 Q38 42 68 18" stroke="#00f0ff" stroke-width="1.2" fill="none" stroke-linecap="round"/>',
+        '<path d="M8 14 L8 30 Q38 44 68 30 L68 14" stroke="#00f0ff" stroke-width="1.2" fill="none" stroke-linecap="round"/>',
+        '<path d="M8 14 Q38 50 68 14" stroke="#00f0ff" stroke-width="1.2" fill="none" stroke-linecap="round"/>',
+        '<path d="M14 14 Q38 44 62 14" stroke="#00f0ff" stroke-width="1.2" fill="none" stroke-linecap="round"/>'],
+      hair: ['<path d="M4 28 Q12 6 38 4 Q64 6 72 28" stroke="#00f0ff" stroke-width="1.5" fill="rgba(0,240,255,0.07)" stroke-linecap="round"/>',
+        '<path d="M4 28 Q2 6 38 2 Q74 6 72 28 Q70 38 66 44 Q38 50 10 44 Q6 38 4 28Z" stroke="#00f0ff" stroke-width="1.5" fill="rgba(0,240,255,0.07)" stroke-linecap="round"/>',
+        '<path d="M4 28 Q38 22 72 28" stroke="#00f0ff" stroke-width="1.5" fill="none" stroke-linecap="round"/>',
+        '<path d="M4 28 Q2 10 20 6 Q30 2 38 4 Q46 2 56 6 Q74 10 72 28 Q62 18 52 22 Q44 14 38 20 Q32 14 24 22 Q14 18 4 28Z" stroke="#00f0ff" stroke-width="1.5" fill="rgba(0,240,255,0.07)"/>'],
+    };
+    const shapes = defs[part];
+    return `<svg viewBox="0 0 76 44" xmlns="http://www.w3.org/2000/svg" style="width:76px;height:44px">${shapes[idx] || shapes[0]}</svg>`;
+  }
+
+  function applyVariant(part, idx) {
+    PARTS[part].cur = idx;
+    PARTS[part].variants[idx].draw(svg);
+    renderVariants(part);
+  }
+
+  function applySlider(type, val) {
+    const adj = PARTS[activePart].adj || { s: 100, v: 0, w: 100 };
+    if (type === 'scale') { document.getElementById('sv1').textContent = val; adj.s = val; }
+    if (type === 'vert') { document.getElementById('sv2').textContent = val; adj.v = val; }
+    if (type === 'width') { document.getElementById('sv3').textContent = val; adj.w = val; }
+    PARTS[activePart].adj = adj;
+
+    const g = document.getElementById(activePart + '-group');
+    if (g) {
+      g.style.transformBox = 'fill-box';
+      g.style.transformOrigin = 'center';
+      const scY = adj.s / 100;
+      const scX = (adj.s / 100) * (adj.w / 100);
+      g.style.transform = `translateY(${adj.v}px) scale(${scX}, ${scY})`;
+    }
+  }
+
+  function resetFace() {
+    Object.keys(PARTS).forEach(p => {
+      PARTS[p].cur = 0;
+      PARTS[p].adj = { s: 100, v: 0, w: 100 };
+      PARTS[p].variants[0].draw(svg);
+      const g = document.getElementById(p + '-group');
+      if (g) g.style.transform = 'none';
+    });
+    if (document.querySelector('.part-btn.active')) {
+      selectPart(activePart, document.querySelector('.part-btn.active'));
+    }
+  }
+
+  function exportComposite() {
+    const svgEl = document.getElementById('facesvg');
+    const serializer = new XMLSerializer();
+    const svgStr = serializer.serializeToString(svgEl);
+    const blob = new Blob([svgStr], { type: 'image/svg+xml;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const img = new Image();
+    img.onload = function () {
+      const c = document.createElement('canvas');
+      c.width = 320; c.height = 400;
+      const ctx = c.getContext('2d');
+      ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, c.width, c.height);
+      ctx.drawImage(img, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(url);
+      const data = c.toDataURL('image/png');
+      fetch('/save_composite', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image: data })
+      }).then(r => r.json()).then(resp => {
+        document.getElementById('ppct').textContent = 'DONE';
+        document.getElementById('pfill').style.width = '100%';
+
+        const resContainer = document.getElementById('match-results');
+        if (resp.error || !resp.matches || resp.matches.length === 0) {
+          resContainer.innerHTML = `<div style="color:var(--danger);font-size:12px;text-align:center;padding:16px;">${resp.error || 'No match found. Try drawing a more detailed face.'}</div>`;
+        } else {
+          // Store matches globally so onclick can reference by index safely (avoids % encoding issues)
+          window._matches = resp.matches;
+          let html = `<div class="r-label" style="text-align:center;">TOP MATCHES</div>`;
+          resp.matches.forEach((m, i) => {
+            const conf = Math.max(0, Math.min(100, Math.round((1 - m.distance) * 100)));
+            html += `
+          <div onclick="openModal(window._matches[${i}], ${i + 1})" style="background:rgba(0,0,0,0.3);border:1px solid var(--border);border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:all .25s;position:relative;overflow:hidden;" onmouseover="this.style.borderColor='rgba(0,240,255,0.4)';this.style.transform='translateY(-2px)';" onmouseout="this.style.borderColor='rgba(0,240,255,0.15)';this.style.transform='none';">
+            <div style="position:relative;flex-shrink:0;">
+              <img src="/dataset/${m.file}" style="width:52px;height:52px;border-radius:8px;object-fit:cover;border:2px solid rgba(0,240,255,0.3);">
+              <div style="position:absolute;top:-6px;left:-6px;background:var(--accent);color:var(--bg);font-family:var(--mono);font-size:9px;font-weight:700;padding:2px 5px;border-radius:4px;">#${i + 1}</div>
+            </div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-weight:600;font-size:12px;color:var(--text);margin-bottom:4px;text-transform:capitalize;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${m.name}</div>
+              <div style="height:3px;background:rgba(0,0,0,0.4);border-radius:2px;overflow:hidden;margin-bottom:4px;"><div style="width:${conf}%;height:100%;background:linear-gradient(90deg,var(--accent),#00c4d1);border-radius:2px;"></div></div>
+              <div style="font-family:var(--mono);font-size:10px;color:var(--accent);">${conf}% MATCH</div>
+            </div>
+            <div style="color:var(--muted);font-size:16px;">›</div>
+          </div>`;
+          });
+          resContainer.innerHTML = html;
+        }
+      }).catch(err => { alert('Search failed: ' + err); });
+    };
+    img.onerror = function () { alert('Failed to rasterize SVG'); };
+    img.src = url;
+  }
+
+  function openModal(m, rank) {
+    const conf = Math.max(0, Math.min(100, Math.round((1 - m.distance) * 100)));
+    const similarity = ((1 - m.distance) * 100).toFixed(2);
+    const rankLabels = ['1ST', '2ND', '3RD', '4TH', '5TH'];
+    const confLabels = [
+      { min: 85, label: 'EXTREMELY HIGH — Near Certain Match' },
+      { min: 70, label: 'HIGH CONFIDENCE — Strong Match' },
+      { min: 55, label: 'MODERATE — Possible Match' },
+      { min: 40, label: 'LOW — Weak Similarity' },
+      { min: 0, label: 'VERY LOW — Poor Match' },
+    ];
+    const confSub = (confLabels.find(c => conf >= c.min) || confLabels.at(-1)).label;
+
+    document.getElementById('modalPhoto').src = '/dataset/' + m.file;
+    document.getElementById('modalName').textContent = m.name;
+    document.getElementById('modalIdNum').textContent = 'ID: LFW-' + Math.abs(m.name.split('').reduce((a, c) => a + c.charCodeAt(0), 0)).toString(16).toUpperCase().padStart(6, '0');
+
+    // Badges
+    document.getElementById('modalBadges').innerHTML = `
+    <span class="badge badge-rank">${rankLabels[rank - 1] || '#' + rank}</span>
+    <span class="badge badge-db">LFW DB</span>
+  `;
+
+    // Confidence
+    document.getElementById('modalConf').textContent = conf + '%';
+    document.getElementById('modalConfSub').textContent = confSub;
+    const fill = document.getElementById('modalConfFill');
+    fill.style.width = '0%';
+    setTimeout(() => { fill.style.width = conf + '%'; }, 60);
+
+    // Stats
+    document.getElementById('s-rank').textContent = rankLabels[rank - 1] || '#' + rank;
+    document.getElementById('s-dist').textContent = m.distance.toFixed(4);
+
+    // Bio rows
+    document.getElementById('b-name').textContent = m.name;
+    document.getElementById('b-conf').textContent = conf + '%';
+    document.getElementById('b-dist').textContent = m.distance.toFixed(6);
+    document.getElementById('b-sim').textContent = similarity + '%';
+    document.getElementById('b-file').textContent = m.file;
+
+    // Timestamp
+    document.getElementById('modalTs').textContent = 'QUERIED: ' + new Date().toLocaleTimeString();
+
+    document.getElementById('profileModal').classList.add('open');
+  }
+
+  function closeModal(e) {
+    if (e.target === document.getElementById('profileModal')) {
+      document.getElementById('profileModal').classList.remove('open');
+    }
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') document.getElementById('profileModal').classList.remove('open');
+  });
+
+  function runMatch() {
+    const fill = document.getElementById('pfill');
+    const pct = document.getElementById('ppct');
+    document.getElementById('match-results').innerHTML = '';
+    fill.style.width = '0%'; let v = 0;
+    const iv = setInterval(() => {
+      v += Math.floor(Math.random() * 7) + 3;
+      if (v >= 90) { v = 90; }
+      fill.style.width = v + '%';
+      pct.textContent = v + '%';
+    }, 100);
+    setTimeout(() => exportComposite(), 500);
+  }
+
+  renderVariants('eyes');
+</script>
