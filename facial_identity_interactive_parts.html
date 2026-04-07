@@ -1035,9 +1035,14 @@
 <div class="shell">
   <div class="topbar">
     <div class="brand">
-      <div class="dot"></div>Latent-space Facial Identity Mapping System
+      <div class="dot" id="db-dot"></div>Latent-space Facial Identity Mapping System
     </div>
-    <div class="topbar-right">INTERACTIVE PARTS MODE</div>
+    <div class="topbar-right" style="display:flex; gap: 20px; align-items:center;">
+      <div id="db-stats"
+        style="font-family: var(--mono); font-size: 11px; color: var(--accent); opacity: 0.8; letter-spacing: 1px;">DB
+        STATUS: UNKNOWN</div>
+      <div>INTERACTIVE PARTS MODE</div>
+    </div>
   </div>
   <div class="main">
 
@@ -1052,8 +1057,13 @@
       <button class="part-btn" onclick="selectPart('ears',this)"><span class="ico">👂</span>Ears</button>
       <button class="part-btn" onclick="selectPart('jaw',this)"><span class="ico">🫦</span>Jawline</button>
       <button class="part-btn" onclick="selectPart('hair',this)"><span class="ico">💇</span>Hair</button>
+      <button class="part-btn" onclick="selectPart('pimples',this)"><span class="ico">🔴</span>Pimples</button>
+      <button class="part-btn" onclick="selectPart('beard',this)"><span class="ico">🧔</span>Beard</button>
+      <button class="part-btn" onclick="selectPart('mustache',this)"><span class="ico">🥸</span>Mustache</button>
+      <button class="part-btn" onclick="selectPart('skin',this)"><span class="ico">🟫</span>Skin Tone</button>
+      <button class="part-btn" onclick="selectPart('gender',this)"><span class="ico">⚥</span>Gender Base</button>
       <div class="divider"></div>
-      <div class="slider-sec">
+      <div id="adjust-sec" class="slider-sec">
         <div class="sec-label" style="padding:0 0 8px">ADJUST</div>
         <div class="sl-row">
           <label>Scale <span id="sv1">100</span></label>
@@ -1073,8 +1083,6 @@
     <!-- CENTER CANVAS -->
     <div class="center">
       <div class="toolbar">
-        <button class="tbtn on">COMPOSITE</button>
-        <button class="tbtn">LANDMARKS</button>
         <div style="flex:1"></div>
         <button class="tbtn red" onclick="resetFace()">RESET</button>
         <button class="tbtn" id="exportBtn" onclick="exportComposite()">EXPORT</button>
@@ -1083,56 +1091,135 @@
         <div class="grid-bg"></div>
         <div class="scan"></div>
         <svg id="facesvg" viewBox="0 0 320 400" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <radialGradient id="skin-1" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#2a3b4a" />
+              <stop offset="100%" stop-color="#0a121e" />
+            </radialGradient>
+            <radialGradient id="skin-2" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#ffe0bd" />
+              <stop offset="100%" stop-color="#dfa98c" />
+            </radialGradient>
+            <radialGradient id="skin-3" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#f0c297" />
+              <stop offset="100%" stop-color="#c9956f" />
+            </radialGradient>
+            <radialGradient id="skin-4" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#bd926a" />
+              <stop offset="100%" stop-color="#996c43" />
+            </radialGradient>
+            <radialGradient id="skin-5" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#8d5524" />
+              <stop offset="100%" stop-color="#603714" />
+            </radialGradient>
+            <radialGradient id="skin-6" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#4e270f" />
+              <stop offset="100%" stop-color="#291102" />
+            </radialGradient>
+
+            <linearGradient id="lip-top" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#b6585d" />
+              <stop offset="100%" stop-color="#8a373b" />
+            </linearGradient>
+            <linearGradient id="lip-bot" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#d67b80" />
+              <stop offset="100%" stop-color="#ad4e53" />
+            </linearGradient>
+            <radialGradient id="sclera" cx="50%" cy="50%" r="50%">
+              <stop offset="50%" stop-color="#ffffff" />
+              <stop offset="100%" stop-color="#cecece" />
+            </radialGradient>
+            <radialGradient id="iris" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#5c3614" />
+              <stop offset="60%" stop-color="#3d2105" />
+              <stop offset="100%" stop-color="#140a02" />
+            </radialGradient>
+
+            <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+              <feDropShadow dx="0" dy="6" stdDeviation="5" flood-opacity="0.4" />
+            </filter>
+            <filter id="sub-shadow" x="-20%" y="-20%" width="140%" height="140%">
+              <feDropShadow dx="0" dy="2" stdDeviation="2" flood-opacity="0.3" />
+            </filter>
+          </defs>
+
           <!-- Head -->
           <ellipse id="head" cx="160" cy="210" rx="105" ry="135" stroke="#00f0ff" stroke-width="1.5"
             stroke-dasharray="5 4" fill="rgba(0,240,255,0.03)" />
+
           <!-- Jaw -->
           <g id="jaw-group">
-            <path id="jaw" d="M80 280 Q160 340 240 280" stroke="#00f0ff" stroke-width="1.2" fill="none"
-              stroke-linecap="round" />
+            <path id="jaw" d="M80 280 Q160 340 240 280" stroke="#000" stroke-width="1" fill="none"
+              stroke-linecap="round" filter="url(#sub-shadow)" />
           </g>
+
           <!-- Hair -->
           <g id="hair-group">
-            <path id="hair" d="M58 180 Q70 70 160 58 Q250 70 262 180" stroke="#00f0ff" stroke-width="1.5"
-              fill="rgba(0,240,255,0.06)" stroke-linecap="round" />
+            <path id="hair"
+              d="M58 180 Q60 140 70 110 Q90 70 140 60 Q190 65 240 90 Q260 130 262 180 Q250 160 240 140 Q210 110 180 105 Q160 115 150 105 Q110 100 80 130 Q65 150 58 180 Z"
+              fill="#222" stroke="#111" stroke-width="3" stroke-linecap="round" filter="url(#shadow)" />
           </g>
+
           <!-- Ears -->
           <g id="ears-group">
-            <path id="ear-l" d="M55 185 Q44 205 55 228" stroke="#00f0ff" stroke-width="1.5" fill="none"
+            <path id="ear-l" d="M55 185 Q44 205 55 228" fill="rgba(0,0,0,0)" stroke="#00f0ff" stroke-width="1.5"
               stroke-linecap="round" />
-            <path id="ear-r" d="M265 185 Q276 205 265 228" stroke="#00f0ff" stroke-width="1.5" fill="none"
+            <path id="ear-r" d="M265 185 Q276 205 265 228" fill="rgba(0,0,0,0)" stroke="#00f0ff" stroke-width="1.5"
               stroke-linecap="round" />
           </g>
+
           <!-- Brows -->
           <g id="brows-group">
-            <path id="brow-l" d="M100 145 Q122 136 144 145" stroke="#00f0ff" stroke-width="2" fill="none"
-              stroke-linecap="round" />
-            <path id="brow-r" d="M176 145 Q198 136 220 145" stroke="#00f0ff" stroke-width="2" fill="none"
-              stroke-linecap="round" />
+            <path id="brow-l" d="M 96 148 Q 115 138 144 146 Q 120 131 96 148 Z" fill="#322c2a" stroke="none"
+              filter="url(#sub-shadow)" />
+            <path id="brow-r" d="M 224 148 Q 205 138 176 146 Q 200 131 224 148 Z" fill="#322c2a" stroke="none"
+              filter="url(#sub-shadow)" />
           </g>
+
           <!-- Eyes -->
           <g id="eyes-group">
-            <ellipse id="eye-l" cx="122" cy="168" rx="24" ry="13" stroke="#00f0ff" stroke-width="1.5"
-              fill="rgba(0,240,255,0.08)" />
-            <circle cx="122" cy="168" r="8" fill="#00f0ff" opacity=".5" />
-            <circle cx="122" cy="168" r="3.5" fill="#0a0d12" />
-            <ellipse id="eye-r" cx="198" cy="168" rx="24" ry="13" stroke="#00f0ff" stroke-width="1.5"
-              fill="rgba(0,240,255,0.08)" />
-            <circle cx="198" cy="168" r="8" fill="#00f0ff" opacity=".5" />
-            <circle cx="198" cy="168" r="3.5" fill="#0a0d12" />
+            <g id="eye-group-l">
+              <ellipse id="eye-l" cx="122" cy="168" rx="24" ry="13" fill="url(#sclera)" stroke="#554" stroke-width="1.5"
+                filter="url(#sub-shadow)" />
+              <circle cx="122" cy="168" r="9" fill="url(#iris)" />
+              <circle cx="122" cy="168" r="3.5" fill="#000" />
+              <circle cx="118" cy="164" r="3.5" fill="#fff" opacity=".8" />
+            </g>
+            <g id="eye-group-r">
+              <ellipse id="eye-r" cx="198" cy="168" rx="24" ry="13" fill="url(#sclera)" stroke="#554" stroke-width="1.5"
+                filter="url(#sub-shadow)" />
+              <circle cx="198" cy="168" r="9" fill="url(#iris)" />
+              <circle cx="198" cy="168" r="3.5" fill="#000" />
+              <circle cx="194" cy="164" r="3.5" fill="#fff" opacity=".8" />
+            </g>
           </g>
+
           <!-- Nose -->
           <g id="nose-group">
-            <path id="nose" d="M160 188 L148 228 Q160 234 172 228 L160 188Z" stroke="#00f0ff" stroke-width="1.2"
-              fill="rgba(0,240,255,0.05)" stroke-linejoin="round" />
+            <path id="nose" d="M160 188 L148 228 Q160 234 172 228 L160 188Z" fill="rgba(0,0,0,0.15)" stroke="#000"
+              stroke-width="0.8" stroke-linejoin="round" />
           </g>
+
           <!-- Mouth -->
           <g id="mouth-group">
-            <path id="mouth-top" d="M132 262 Q160 252 188 262" stroke="#00f0ff" stroke-width="1" fill="none"
-              stroke-linecap="round" />
-            <path id="mouth-bot" d="M132 262 Q160 280 188 262" stroke="#00f0ff" stroke-width="1.5"
-              fill="rgba(0,240,255,0.05)" stroke-linecap="round" />
+            <path id="mouth-top" d="M132 262 Q160 252 188 262" fill="url(#lip-top)" stroke="#511" stroke-width="1.2"
+              stroke-linecap="round" filter="url(#sub-shadow)" />
+            <path id="mouth-bot" d="M132 262 Q160 280 188 262" fill="url(#lip-bot)" stroke="#511" stroke-width="1.2"
+              stroke-linecap="round" filter="url(#sub-shadow)" />
           </g>
+
+          <!-- Gender Specific Assets (eyelashes driven by gender selector) -->
+          <g id="eyelashes-group"></g>
+          <!-- Standalone beard group (driven by Beard part) -->
+          <g id="beard-standalone-group"></g>
+          <!-- Standalone mustache group (driven by Mustache part) -->
+          <g id="mustache-group"></g>
+
+          <!-- Legacy beard group (driven by gender selector) -->
+          <g id="beard-group"></g>
+
+          <!-- Pimples -->
+          <g id="pimples-group"></g>
           <!-- Guide lines -->
           <line x1="50" y1="168" x2="270" y2="168" stroke="#00f0ff" stroke-width="0.4" opacity=".15" />
           <line x1="50" y1="228" x2="270" y2="228" stroke="#00f0ff" stroke-width="0.4" opacity=".15" />
@@ -1254,23 +1341,29 @@
       variants: [
         {
           name: 'Almond', draw: s => {
+            s.querySelector('#eye-group-l').setAttribute('transform', 'none');
+            s.querySelector('#eye-group-r').setAttribute('transform', 'none');
             s.querySelectorAll('#eyes-group ellipse').forEach((e, i) => { e.setAttribute('ry', '13'); e.setAttribute('rx', '24') });
           }
         },
         {
           name: 'Round', draw: s => {
+            s.querySelector('#eye-group-l').setAttribute('transform', 'none');
+            s.querySelector('#eye-group-r').setAttribute('transform', 'none');
             s.querySelectorAll('#eyes-group ellipse').forEach(e => { e.setAttribute('ry', '17'); e.setAttribute('rx', '17') });
           }
         },
         {
           name: 'Narrow', draw: s => {
+            s.querySelector('#eye-group-l').setAttribute('transform', 'none');
+            s.querySelector('#eye-group-r').setAttribute('transform', 'none');
             s.querySelectorAll('#eyes-group ellipse').forEach(e => { e.setAttribute('ry', '8'); e.setAttribute('rx', '26') });
           }
         },
         {
           name: 'Wide-set', draw: s => {
-            s.querySelector('#eye-l').setAttribute('cx', '108');
-            s.querySelector('#eye-r').setAttribute('cx', '212');
+            s.querySelector('#eye-group-l').setAttribute('transform', 'translate(-14, 0)');
+            s.querySelector('#eye-group-r').setAttribute('transform', 'translate(14, 0)');
             s.querySelectorAll('#eyes-group ellipse').forEach(e => { e.setAttribute('ry', '13'); e.setAttribute('rx', '24') });
           }
         },
@@ -1281,28 +1374,26 @@
       variants: [
         {
           name: 'Arched', draw: s => {
-            s.querySelector('#brow-l').setAttribute('d', 'M100 145 Q122 136 144 145');
-            s.querySelector('#brow-r').setAttribute('d', 'M176 145 Q198 136 220 145');
+            s.querySelector('#brow-l').setAttribute('d', 'M 96 148 Q 115 138 144 146 Q 120 131 96 148 Z');
+            s.querySelector('#brow-r').setAttribute('d', 'M 224 148 Q 205 138 176 146 Q 200 131 224 148 Z');
           }
         },
         {
           name: 'Straight', draw: s => {
-            s.querySelector('#brow-l').setAttribute('d', 'M100 142 Q122 140 144 142');
-            s.querySelector('#brow-r').setAttribute('d', 'M176 142 Q198 140 220 142');
+            s.querySelector('#brow-l').setAttribute('d', 'M 100 143 Q 122 138 144 143 Q 122 130 100 143 Z');
+            s.querySelector('#brow-r').setAttribute('d', 'M 220 143 Q 198 138 176 143 Q 198 130 220 143 Z');
           }
         },
         {
           name: 'Bushy', draw: s => {
-            s.querySelector('#brow-l').setAttribute('d', 'M98 148 Q122 133 146 148');
-            s.querySelector('#brow-r').setAttribute('d', 'M174 148 Q198 133 222 148');
-            s.querySelectorAll('#brows-group path').forEach(p => p.setAttribute('stroke-width', '4'));
+            s.querySelector('#brow-l').setAttribute('d', 'M 94 149 Q 115 136 146 147 Q 120 124 94 149 Z');
+            s.querySelector('#brow-r').setAttribute('d', 'M 226 149 Q 205 136 174 147 Q 200 124 226 149 Z');
           }
         },
         {
           name: 'Thin', draw: s => {
-            s.querySelector('#brow-l').setAttribute('d', 'M104 143 Q122 138 140 143');
-            s.querySelector('#brow-r').setAttribute('d', 'M180 143 Q198 138 216 143');
-            s.querySelectorAll('#brows-group path').forEach(p => p.setAttribute('stroke-width', '1'));
+            s.querySelector('#brow-l').setAttribute('d', 'M 100 145 Q 122 137 142 144 Q 122 134 100 145 Z');
+            s.querySelector('#brow-r').setAttribute('d', 'M 220 145 Q 198 137 178 144 Q 198 134 220 145 Z');
           }
         },
       ]
@@ -1312,22 +1403,47 @@
       variants: [
         {
           name: 'Straight', draw: s => {
-            s.querySelector('#nose').setAttribute('d', 'M160 188 L148 228 Q160 234 172 228 L160 188Z');
+            s.querySelectorAll('#nose-group .nostril').forEach(e => e.remove());
+            s.querySelector('#nose').setAttribute('d',
+              'M160 190 C158 200 156 212 155 222 C152 228 148 230 144 232 Q152 238 160 238 Q168 238 176 232 C172 230 168 228 165 222 C164 212 162 200 160 190Z');
+            const ng = s.querySelector('#nose-group');
+            // Subtle dark nostril arcs — no rings, just shadow curves
+            const addArc = (d) => { const p = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p.setAttribute('class', 'nostril'); p.setAttribute('d', d); p.setAttribute('stroke', 'rgba(0,0,0,0.55)'); p.setAttribute('stroke-width', '2.2'); p.setAttribute('fill', 'none'); p.setAttribute('stroke-linecap', 'round'); ng.appendChild(p); };
+            addArc('M148 232 Q152 236 156 233');
+            addArc('M172 232 Q168 236 164 233');
           }
         },
         {
           name: 'Button', draw: s => {
-            s.querySelector('#nose').setAttribute('d', 'M155 200 Q148 220 150 230 Q160 236 170 230 Q172 220 165 200 Q160 195 155 200Z');
+            s.querySelectorAll('#nose-group .nostril').forEach(e => e.remove());
+            s.querySelector('#nose').setAttribute('d',
+              'M160 200 C158 208 155 216 153 224 C150 230 146 232 142 234 Q152 242 160 241 Q168 242 178 234 C174 232 170 230 167 224 C165 216 162 208 160 200Z');
+            const ng = s.querySelector('#nose-group');
+            const addArc = (d) => { const p = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p.setAttribute('class', 'nostril'); p.setAttribute('d', d); p.setAttribute('stroke', 'rgba(0,0,0,0.55)'); p.setAttribute('stroke-width', '2.5'); p.setAttribute('fill', 'none'); p.setAttribute('stroke-linecap', 'round'); ng.appendChild(p); };
+            addArc('M144 234 Q149 240 155 236');
+            addArc('M176 234 Q171 240 165 236');
           }
         },
         {
           name: 'Wide', draw: s => {
-            s.querySelector('#nose').setAttribute('d', 'M160 188 L138 228 Q160 238 182 228 L160 188Z');
+            s.querySelectorAll('#nose-group .nostril').forEach(e => e.remove());
+            s.querySelector('#nose').setAttribute('d',
+              'M160 190 C157 202 152 215 148 224 C143 230 136 232 133 234 Q148 242 160 241 Q172 242 187 234 C184 232 177 230 172 224 C168 215 163 202 160 190Z');
+            const ng = s.querySelector('#nose-group');
+            const addArc = (d) => { const p = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p.setAttribute('class', 'nostril'); p.setAttribute('d', d); p.setAttribute('stroke', 'rgba(0,0,0,0.55)'); p.setAttribute('stroke-width', '2.5'); p.setAttribute('fill', 'none'); p.setAttribute('stroke-linecap', 'round'); ng.appendChild(p); };
+            addArc('M136 234 Q143 241 151 237');
+            addArc('M184 234 Q177 241 169 237');
           }
         },
         {
           name: 'Narrow', draw: s => {
-            s.querySelector('#nose').setAttribute('d', 'M160 188 L154 228 Q160 232 166 228 L160 188Z');
+            s.querySelectorAll('#nose-group .nostril').forEach(e => e.remove());
+            s.querySelector('#nose').setAttribute('d',
+              'M160 186 C159 198 158 212 157 222 C155 228 152 230 150 232 Q156 237 160 237 Q164 237 170 232 C168 230 165 228 163 222 C162 212 161 198 160 186Z');
+            const ng = s.querySelector('#nose-group');
+            const addArc = (d) => { const p = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p.setAttribute('class', 'nostril'); p.setAttribute('d', d); p.setAttribute('stroke', 'rgba(0,0,0,0.55)'); p.setAttribute('stroke-width', '2'); p.setAttribute('fill', 'none'); p.setAttribute('stroke-linecap', 'round'); ng.appendChild(p); };
+            addArc('M151 232 Q154 236 158 234');
+            addArc('M169 232 Q166 236 162 234');
           }
         },
       ]
@@ -1402,13 +1518,173 @@
     hair: {
       label: 'HAIR', cur: 0,
       variants: [
-        { name: 'Short', draw: s => { s.querySelector('#hair').setAttribute('d', 'M58 180 Q70 70 160 58 Q250 70 262 180') } },
-        { name: 'Long', draw: s => { s.querySelector('#hair').setAttribute('d', 'M58 180 Q50 60 160 45 Q270 60 262 180 Q260 250 250 320 Q160 350 70 320 Q60 250 58 180Z') } },
-        { name: 'Bald', draw: s => { s.querySelector('#hair').setAttribute('d', 'M58 180 Q160 165 262 180') } },
-        { name: 'Curly', draw: s => { s.querySelector('#hair').setAttribute('d', 'M58 180 Q55 110 80 75 Q100 50 130 48 Q160 45 190 48 Q220 50 240 75 Q265 110 262 180 Q240 155 220 165 Q200 148 180 162 Q160 148 140 162 Q120 148 100 165 Q80 155 58 180Z') } },
+        { name: 'Short', draw: s => { s.querySelector('#hair').setAttribute('d', 'M58 180 Q60 140 70 110 Q90 70 140 60 Q190 65 240 90 Q260 130 262 180 Q250 160 240 140 Q210 110 180 105 Q160 115 150 105 Q110 100 80 130 Q65 150 58 180 Z'); s.querySelector('#hair').setAttribute('fill', '#222'); } },
+        { name: 'Long', draw: s => { s.querySelector('#hair').setAttribute('d', 'M58 180 Q50 70 160 50 Q270 70 262 180 Q262 250 280 340 L 220 340 Q220 230 200 140 Q180 100 160 90 Q140 100 120 140 Q100 230 100 340 L 40 340 Q58 250 58 180 Z'); s.querySelector('#hair').setAttribute('fill', '#222'); } },
+        { name: 'Curly', draw: s => { s.querySelector('#hair').setAttribute('d', 'M58 180 Q30 140 60 100 Q70 60 120 50 Q160 30 200 50 Q250 60 260 100 Q290 140 262 180 Q250 130 220 110 Q160 100 100 110 Q70 130 58 180 Z'); s.querySelector('#hair').setAttribute('fill', '#222'); } },
+        { name: 'Wavy', draw: s => { s.querySelector('#hair').setAttribute('d', 'M58 180 Q40 100 160 50 Q280 100 262 180 Q270 220 250 250 Q280 290 260 350 L210 350 Q210 260 210 180 Q190 120 160 100 Q130 120 110 180 Q110 260 110 350 L60 350 Q40 290 70 250 Q50 220 58 180 Z'); s.querySelector('#hair').setAttribute('fill', '#222'); } },
+        { name: 'Buzzcut', draw: s => { s.querySelector('#hair').setAttribute('d', 'M58 180 Q65 100 160 70 Q255 100 262 180 L250 140 Q210 100 160 100 Q110 100 70 140 Z'); s.querySelector('#hair').setAttribute('fill', 'rgba(34,34,34,0.6)'); } },
+        { name: 'Bald', draw: s => { s.querySelector('#hair').setAttribute('d', 'M0 0'); } },
+      ]
+    },
+    pimples: {
+      label: 'PIMPLES', cur: 0,
+      variants: [
+        { name: 'None', draw: s => { s.querySelector('#pimples-group').innerHTML = ''; } },
+        { name: 'Few', draw: s => { s.querySelector('#pimples-group').innerHTML = '<circle cx="130" cy="240" r="2" fill="#ff0055" opacity="0.8"/><circle cx="180" cy="200" r="1.5" fill="#ff0055" opacity="0.8"/><circle cx="150" cy="150" r="2" fill="#ff0055" opacity="0.8"/>'; } },
+        { name: 'Many', draw: s => { s.querySelector('#pimples-group').innerHTML = '<circle cx="130" cy="240" r="2" fill="#ff0055" opacity="0.8"/><circle cx="180" cy="200" r="1.5" fill="#ff0055" opacity="0.8"/><circle cx="150" cy="150" r="2" fill="#ff0055" opacity="0.8"/><circle cx="110" cy="210" r="2.5" fill="#ff0055" opacity="0.8"/><circle cx="210" cy="230" r="1.5" fill="#ff0055" opacity="0.8"/><circle cx="140" cy="270" r="2" fill="#ff0055" opacity="0.8"/><circle cx="180" cy="250" r="1.5" fill="#ff0055" opacity="0.8"/>'; } },
+        { name: 'Acne', draw: s => { s.querySelector('#pimples-group').innerHTML = '<circle cx="120" cy="240" r="3" fill="#ff0055" opacity="0.9"/><circle cx="130" cy="250" r="2.5" fill="#ff0055" opacity="0.9"/><circle cx="115" cy="220" r="2" fill="#ff0055" opacity="0.8"/><circle cx="190" cy="230" r="3" fill="#ff0055" opacity="0.9"/><circle cx="200" cy="245" r="2" fill="#ff0055" opacity="0.8"/><circle cx="180" cy="260" r="2.5" fill="#ff0055" opacity="0.9"/><circle cx="150" cy="140" r="2.5" fill="#ff0055" opacity="0.8"/><circle cx="165" cy="145" r="2" fill="#ff0055" opacity="0.8"/>'; } },
+      ]
+    },
+    beard: {
+      label: 'BEARD', cur: 0,
+      variants: [
+        { name: 'None', draw: s => { s.querySelector('#beard-standalone-group').innerHTML = ''; } },
+        {
+          name: 'Stubble', draw: s => {
+            s.querySelector('#beard-standalone-group').innerHTML =
+              '<path d="M95 255 Q160 290 225 255 Q185 285 160 290 Q135 285 95 255Z" fill="#3a2e2e" opacity="0.25" filter="url(#sub-shadow)"/>';
+          }
+        },
+        {
+          name: 'Short', draw: s => {
+            s.querySelector('#beard-standalone-group').innerHTML =
+              '<path d="M88 248 Q160 340 232 248 Q195 300 160 308 Q125 300 88 248Z" fill="#2a2020" opacity="0.55" filter="url(#sub-shadow)"/><path d="M128 245 Q160 236 192 245 Q160 262 128 245Z" fill="#2a2020" opacity="0.6"/>';
+          }
+        },
+        {
+          name: 'Full', draw: s => {
+            s.querySelector('#beard-standalone-group').innerHTML =
+              '<path d="M82 246 Q160 370 238 246 Q196 315 160 322 Q124 315 82 246Z" fill="#1a1212" opacity="0.92" filter="url(#shadow)"/><path d="M122 244 Q160 232 198 244 Q160 268 122 244Z" fill="#1a1212" opacity="0.95"/><path d="M76 180 Q83 222 88 252 L74 246Z" fill="#1a1212" opacity="0.9"/><path d="M244 180 Q237 222 232 252 L246 246Z" fill="#1a1212" opacity="0.9"/>';
+          }
+        },
+        {
+          name: 'Goatee', draw: s => {
+            s.querySelector('#beard-standalone-group').innerHTML =
+              '<path d="M140 265 Q160 340 180 265 Q160 355 140 265Z" fill="#1e1616" opacity="0.88" filter="url(#shadow)"/><path d="M142 263 Q160 255 178 263 Q160 272 142 263Z" fill="#1e1616" opacity="0.9"/>';
+          }
+        },
+      ]
+    },
+    mustache: {
+      label: 'MUSTACHE', cur: 0,
+      variants: [
+        { name: 'None', draw: s => { s.querySelector('#mustache-group').innerHTML = ''; } },
+        {
+          name: 'Pencil', draw: s => {
+            s.querySelector('#mustache-group').innerHTML =
+              '<path d="M140 258 Q160 252 180 258" stroke="#1a1212" stroke-width="4" fill="none" stroke-linecap="round"/>';
+          }
+        },
+        {
+          name: 'Chevron', draw: s => {
+            s.querySelector('#mustache-group').innerHTML =
+              '<path d="M125 254 Q145 244 160 250 Q175 244 195 254 Q175 256 160 254 Q145 256 125 254Z" fill="#1a1212" opacity="0.9"/>';
+          }
+        },
+        {
+          name: 'Walrus', draw: s => {
+            s.querySelector('#mustache-group').innerHTML =
+              '<path d="M118 250 Q145 238 160 246 Q175 238 202 250 Q185 262 160 266 Q135 262 118 250Z" fill="#1a1212" opacity="0.92"/>';
+          }
+        },
+        {
+          name: 'Handlebar', draw: s => {
+            s.querySelector('#mustache-group').innerHTML =
+              '<path d="M128 252 Q145 242 160 250 Q175 242 192 252 Q178 258 160 254 Q142 258 128 252Z" fill="#1a1212" opacity="0.9"/><path d="M128 252 Q112 248 108 238 Q116 248 128 252Z" fill="#1a1212" opacity="0.9"/><path d="M192 252 Q208 248 212 238 Q204 248 192 252Z" fill="#1a1212" opacity="0.9"/>';
+          }
+        },
+      ]
+    },
+    skin: {
+      label: 'SKIN TONE', cur: 0,
+      variants: [
+        {
+          name: 'Default', draw: s => {
+            s.querySelector('#head').setAttribute('fill', 'rgba(0,240,255,0.03)');
+            s.querySelector('#head').setAttribute('stroke', '#00f0ff');
+            s.querySelector('#head').setAttribute('stroke-dasharray', '5 4');
+            s.querySelectorAll('#ears-group path').forEach(p => { p.setAttribute('fill', 'rgba(0,0,0,0)'); p.setAttribute('stroke', '#00f0ff'); });
+          }
+        },
+        {
+          name: 'Light', draw: s => {
+            s.querySelector('#head').setAttribute('fill', 'url(#skin-2)');
+            s.querySelector('#head').setAttribute('stroke', '#d49b7d');
+            s.querySelector('#head').removeAttribute('stroke-dasharray');
+            s.querySelectorAll('#ears-group path').forEach(p => { p.setAttribute('fill', 'url(#skin-2)'); p.setAttribute('stroke', '#d49b7d'); });
+          }
+        },
+        {
+          name: 'Medium', draw: s => {
+            s.querySelector('#head').setAttribute('fill', 'url(#skin-3)');
+            s.querySelector('#head').setAttribute('stroke', '#bd855b');
+            s.querySelector('#head').removeAttribute('stroke-dasharray');
+            s.querySelectorAll('#ears-group path').forEach(p => { p.setAttribute('fill', 'url(#skin-3)'); p.setAttribute('stroke', '#bd855b'); });
+          }
+        },
+        {
+          name: 'Olive', draw: s => {
+            s.querySelector('#head').setAttribute('fill', 'url(#skin-4)');
+            s.querySelector('#head').setAttribute('stroke', '#8a5c36');
+            s.querySelector('#head').removeAttribute('stroke-dasharray');
+            s.querySelectorAll('#ears-group path').forEach(p => { p.setAttribute('fill', 'url(#skin-4)'); p.setAttribute('stroke', '#8a5c36'); });
+          }
+        },
+        {
+          name: 'Brown', draw: s => {
+            s.querySelector('#head').setAttribute('fill', 'url(#skin-5)');
+            s.querySelector('#head').setAttribute('stroke', '#542d0b');
+            s.querySelector('#head').removeAttribute('stroke-dasharray');
+            s.querySelectorAll('#ears-group path').forEach(p => { p.setAttribute('fill', 'url(#skin-5)'); p.setAttribute('stroke', '#542d0b'); });
+          }
+        },
+        {
+          name: 'Dark', draw: s => {
+            s.querySelector('#head').setAttribute('fill', 'url(#skin-6)');
+            s.querySelector('#head').setAttribute('stroke', '#240d00');
+            s.querySelector('#head').removeAttribute('stroke-dasharray');
+            s.querySelectorAll('#ears-group path').forEach(p => { p.setAttribute('fill', 'url(#skin-6)'); p.setAttribute('stroke', '#240d00'); });
+          }
+        },
+      ]
+    },
+    gender: {
+      label: 'GENDER BASE', cur: 0,
+      variants: [
+        {
+          name: 'Neutral', draw: s => {
+            s.querySelector('#eyelashes-group').innerHTML = '';
+            s.querySelector('#beard-group').innerHTML = '';
+            window._selectedGender = 'any';
+          }
+        },
+        {
+          name: 'Feminine', draw: s => {
+            s.querySelector('#eyelashes-group').innerHTML = '<path d="M98 165 Q122 145 146 165" stroke="#111" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M98 165 L88 152" stroke="#111" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M106 156 L98 144" stroke="#111" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M116 151 L112 140" stroke="#111" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M174 165 Q198 145 222 165" stroke="#111" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M222 165 L232 152" stroke="#111" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M214 156 L222 144" stroke="#111" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M204 151 L208 140" stroke="#111" stroke-width="2" fill="none" stroke-linecap="round"/>';
+            s.querySelector('#beard-group').innerHTML = '';
+            window._selectedGender = 'female';
+          }
+        },
+        {
+          name: 'Masculine', draw: s => {
+            s.querySelector('#eyelashes-group').innerHTML = '';
+            s.querySelector('#beard-group').innerHTML = '<path d="M90 260 Q160 340 230 260 Q160 300 90 260 Z" fill="#222" opacity="0.35" filter="url(#sub-shadow)"/><path d="M135 245 Q160 235 185 245 Q160 260 135 245 Z" fill="#222" opacity="0.4"/>';
+            window._selectedGender = 'male';
+          }
+        },
+        {
+          name: 'Masc (Beard)', draw: s => {
+            s.querySelector('#eyelashes-group').innerHTML = '';
+            s.querySelector('#beard-group').innerHTML = '<path d="M85 250 Q160 370 235 250 Q160 310 85 250 Z" fill="#222" opacity="0.9" filter="url(#shadow)"/><path d="M125 245 Q160 230 195 245 Q160 270 125 245 Z" fill="#222" opacity="0.95"/><path d="M78 180 Q85 220 90 255 L75 250 Z" fill="#222" opacity="0.9"/><path d="M242 180 Q235 220 230 255 L245 250 Z" fill="#222" opacity="0.9"/>';
+            window._selectedGender = 'male';
+          }
+        },
       ]
     },
   };
+
+  // Track selected gender globally (default = no filter)
+  window._selectedGender = 'any';
 
   let activePart = 'eyes';
   const svg = document.getElementById('facesvg');
@@ -1418,6 +1694,13 @@
     document.querySelectorAll('.part-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     document.getElementById('cur-part').textContent = PARTS[part].label;
+
+    const adjustSec = document.getElementById('adjust-sec');
+    if (['skin', 'gender', 'pimples'].includes(part)) {
+      adjustSec.style.display = 'none';
+    } else {
+      adjustSec.style.display = 'block';
+    }
 
     const adj = PARTS[part].adj || { s: 100, v: 0, w: 100 };
     PARTS[part].adj = adj;
@@ -1450,14 +1733,20 @@
         '<ellipse cx="22" cy="22" rx="12" ry="12" stroke="#00f0ff" stroke-width="1.5" fill="rgba(0,240,255,0.1)"/><circle cx="22" cy="22" r="5" fill="#00f0ff" opacity=".6"/><ellipse cx="54" cy="22" rx="12" ry="12" stroke="#00f0ff" stroke-width="1.5" fill="rgba(0,240,255,0.1)"/><circle cx="54" cy="22" r="5" fill="#00f0ff" opacity=".6"/>',
         '<ellipse cx="22" cy="22" rx="18" ry="6" stroke="#00f0ff" stroke-width="1.5" fill="rgba(0,240,255,0.1)"/><circle cx="22" cy="22" r="4" fill="#00f0ff" opacity=".6"/><ellipse cx="54" cy="22" rx="18" ry="6" stroke="#00f0ff" stroke-width="1.5" fill="rgba(0,240,255,0.1)"/><circle cx="54" cy="22" r="4" fill="#00f0ff" opacity=".6"/>',
         '<ellipse cx="15" cy="22" rx="12" ry="9" stroke="#00f0ff" stroke-width="1.5" fill="rgba(0,240,255,0.1)"/><circle cx="15" cy="22" r="5" fill="#00f0ff" opacity=".6"/><ellipse cx="61" cy="22" rx="12" ry="9" stroke="#00f0ff" stroke-width="1.5" fill="rgba(0,240,255,0.1)"/><circle cx="61" cy="22" r="5" fill="#00f0ff" opacity=".6"/>'],
-      brows: ['<path d="M8 28 Q22 18 36 28" stroke="#00f0ff" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M40 28 Q54 18 68 28" stroke="#00f0ff" stroke-width="2" fill="none" stroke-linecap="round"/>',
-        '<path d="M8 24 Q22 22 36 24" stroke="#00f0ff" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M40 24 Q54 22 68 24" stroke="#00f0ff" stroke-width="2" fill="none" stroke-linecap="round"/>',
-        '<path d="M6 30 Q22 14 38 30" stroke="#00f0ff" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M38 30 Q54 14 70 30" stroke="#00f0ff" stroke-width="4" fill="none" stroke-linecap="round"/>',
-        '<path d="M12 24 Q22 20 32 24" stroke="#00f0ff" stroke-width="1" fill="none" stroke-linecap="round"/><path d="M44 24 Q54 20 64 24" stroke="#00f0ff" stroke-width="1" fill="none" stroke-linecap="round"/>'],
-      nose: ['<path d="M38 8 L30 34 Q38 38 46 34 L38 8Z" stroke="#00f0ff" stroke-width="1.2" fill="rgba(0,240,255,0.07)" stroke-linejoin="round"/>',
-        '<path d="M36 14 Q30 26 31 34 Q38 38 45 34 Q46 26 40 14 Q38 10 36 14Z" stroke="#00f0ff" stroke-width="1.2" fill="rgba(0,240,255,0.07)"/>',
-        '<path d="M38 8 L22 34 Q38 42 54 34 L38 8Z" stroke="#00f0ff" stroke-width="1.2" fill="rgba(0,240,255,0.07)" stroke-linejoin="round"/>',
-        '<path d="M38 8 L34 34 Q38 37 42 34 L38 8Z" stroke="#00f0ff" stroke-width="1.2" fill="rgba(0,240,255,0.07)" stroke-linejoin="round"/>'],
+      brows: ['<path d="M8 28 Q22 22 36 28 Q22 18 8 28 Z" fill="#322c2a"/><path d="M40 28 Q54 22 68 28 Q54 18 40 28 Z" fill="#322c2a"/>',
+        '<path d="M8 24 Q22 20 36 24 Q22 16 8 24 Z" fill="#322c2a"/><path d="M40 24 Q54 20 68 24 Q54 16 40 24 Z" fill="#322c2a"/>',
+        '<path d="M6 30 Q22 22 38 30 Q22 14 6 30 Z" fill="#322c2a"/><path d="M40 30 Q56 22 72 30 Q56 14 40 30 Z" fill="#322c2a"/>',
+        '<path d="M10 24 Q22 20 34 24 Q22 18 10 24 Z" fill="#322c2a"/><path d="M42 24 Q54 20 66 24 Q54 18 42 24 Z" fill="#322c2a"/>'],
+      nose: [
+        // Straight – slender bridge + oval nostrils
+        '<path d="M38 6 C37 12 36 20 35 28 C33 32 30 33 28 34 Q34 38 38 38 Q42 38 48 34 C46 33 43 32 41 28 C40 20 39 12 38 6Z" stroke="#00f0ff" stroke-width="1" fill="rgba(0,240,255,0.08)"/><ellipse cx="30" cy="34" rx="5" ry="3" fill="rgba(0,240,255,0.13)" stroke="#00f0ff" stroke-width="0.8"/><ellipse cx="46" cy="34" rx="5" ry="3" fill="rgba(0,240,255,0.13)" stroke="#00f0ff" stroke-width="0.8"/>',
+        // Button – short bridge + wide round nostrils
+        '<path d="M38 12 C37 18 35 24 34 30 C32 34 29 35 26 36 Q33 41 38 41 Q43 41 50 36 C47 35 44 34 42 30 C41 24 39 18 38 12Z" stroke="#00f0ff" stroke-width="1" fill="rgba(0,240,255,0.08)"/><ellipse cx="29" cy="36" rx="6" ry="4" fill="rgba(0,240,255,0.15)" stroke="#00f0ff" stroke-width="0.8"/><ellipse cx="47" cy="36" rx="6" ry="4" fill="rgba(0,240,255,0.15)" stroke="#00f0ff" stroke-width="0.8"/>',
+        // Wide – broad bridge + splayed nostrils
+        '<path d="M38 6 C36 13 32 22 29 29 C26 33 22 34 20 35 Q30 41 38 41 Q46 41 56 35 C54 34 50 33 47 29 C44 22 40 13 38 6Z" stroke="#00f0ff" stroke-width="1" fill="rgba(0,240,255,0.08)"/><ellipse cx="23" cy="35" rx="7" ry="4" transform="rotate(-12,23,35)" fill="rgba(0,240,255,0.14)" stroke="#00f0ff" stroke-width="0.8"/><ellipse cx="53" cy="35" rx="7" ry="4" transform="rotate(12,53,35)" fill="rgba(0,240,255,0.14)" stroke="#00f0ff" stroke-width="0.8"/>',
+        // Narrow – tall thin bridge + pinched nostrils
+        '<path d="M38 4 C37.5 11 37 21 36.5 29 C35.5 33 34 34 32 35 Q36 38 38 38 Q40 38 44 35 C42 34 40.5 33 39.5 29 C39 21 38.5 11 38 4Z" stroke="#00f0ff" stroke-width="1" fill="rgba(0,240,255,0.08)"/><ellipse cx="33" cy="35" rx="4" ry="2.5" fill="rgba(0,240,255,0.12)" stroke="#00f0ff" stroke-width="0.8"/><ellipse cx="43" cy="35" rx="4" ry="2.5" fill="rgba(0,240,255,0.12)" stroke="#00f0ff" stroke-width="0.8"/>'
+      ],
       mouth: ['<path d="M16 18 Q38 10 60 18" stroke="#00f0ff" stroke-width="1" fill="none" stroke-linecap="round"/><path d="M16 18 Q38 32 60 18" stroke="#00f0ff" stroke-width="1.5" fill="rgba(0,240,255,0.07)" stroke-linecap="round"/>',
         '<path d="M12 16 Q38 6 64 16" stroke="#00f0ff" stroke-width="1" fill="none" stroke-linecap="round"/><path d="M12 16 Q38 36 64 16" stroke="#00f0ff" stroke-width="1.5" fill="rgba(0,240,255,0.07)" stroke-linecap="round"/>',
         '<path d="M20 20 Q38 14 56 20" stroke="#00f0ff" stroke-width="1" fill="none" stroke-linecap="round"/><path d="M20 20 Q38 28 56 20" stroke="#00f0ff" stroke-width="1.5" fill="rgba(0,240,255,0.07)" stroke-linecap="round"/>',
@@ -1470,10 +1759,56 @@
         '<path d="M8 14 L8 30 Q38 44 68 30 L68 14" stroke="#00f0ff" stroke-width="1.2" fill="none" stroke-linecap="round"/>',
         '<path d="M8 14 Q38 50 68 14" stroke="#00f0ff" stroke-width="1.2" fill="none" stroke-linecap="round"/>',
         '<path d="M14 14 Q38 44 62 14" stroke="#00f0ff" stroke-width="1.2" fill="none" stroke-linecap="round"/>'],
-      hair: ['<path d="M4 28 Q12 6 38 4 Q64 6 72 28" stroke="#00f0ff" stroke-width="1.5" fill="rgba(0,240,255,0.07)" stroke-linecap="round"/>',
-        '<path d="M4 28 Q2 6 38 2 Q74 6 72 28 Q70 38 66 44 Q38 50 10 44 Q6 38 4 28Z" stroke="#00f0ff" stroke-width="1.5" fill="rgba(0,240,255,0.07)" stroke-linecap="round"/>',
-        '<path d="M4 28 Q38 22 72 28" stroke="#00f0ff" stroke-width="1.5" fill="none" stroke-linecap="round"/>',
-        '<path d="M4 28 Q2 10 20 6 Q30 2 38 4 Q46 2 56 6 Q74 10 72 28 Q62 18 52 22 Q44 14 38 20 Q32 14 24 22 Q14 18 4 28Z" stroke="#00f0ff" stroke-width="1.5" fill="rgba(0,240,255,0.07)"/>'],
+      hair: ['<path d="M4 28 Q12 6 38 4 Q64 6 72 28" stroke="#111" stroke-width="1.5" fill="#222" stroke-linecap="round"/>',
+        '<path d="M4 28 Q2 6 38 2 Q74 6 72 28 Q70 38 66 44 L54 44 Q56 26 48 18 Q38 12 28 18 Q20 26 22 44 L10 44 Q6 38 4 28Z" stroke="#111" stroke-width="1.5" fill="#222" stroke-linecap="round"/>',
+        '<path d="M4 28 Q0 10 20 6 Q30 2 38 4 Q46 2 56 6 Q76 10 72 28 Q62 18 52 22 Q44 14 38 20 Q32 14 24 22 Q14 18 4 28Z" stroke="#111" stroke-width="1.5" fill="#222"/>',
+        '<path d="M4 28 Q0 10 38 4 Q74 10 72 28 Q68 36 60 44 L48 44 Q52 26 44 18 Q38 12 32 18 Q24 26 28 44 L16 44 Q8 36 4 28Z" stroke="#111" stroke-width="1.5" fill="#222" stroke-linecap="round"/>',
+        '<path d="M4 28 Q12 10 38 8 Q64 10 72 28 L66 22 Q48 16 38 16 Q28 16 10 22 Z" stroke="#none" fill="rgba(34,34,34,0.6)"/>',
+        '<path d="M4 28 Q38 22 72 28" stroke="#00f0ff" stroke-width="1.5" fill="none" stroke-linecap="round"/>'],
+      pimples: [
+        '',
+        '<circle cx="30" cy="28" r="2" fill="#ff0055"/><circle cx="50" cy="20" r="1.5" fill="#ff0055"/><circle cx="38" cy="12" r="2" fill="#ff0055"/>',
+        '<circle cx="30" cy="28" r="2" fill="#ff0055"/><circle cx="50" cy="20" r="1.5" fill="#ff0055"/><circle cx="38" cy="12" r="2" fill="#ff0055"/><circle cx="20" cy="22" r="2.5" fill="#ff0055"/><circle cx="60" cy="26" r="1.5" fill="#ff0055"/><circle cx="34" cy="36" r="2" fill="#ff0055"/><circle cx="48" cy="32" r="1.5" fill="#ff0055"/>',
+        '<circle cx="25" cy="28" r="3" fill="#ff0055"/><circle cx="30" cy="32" r="2.5" fill="#ff0055"/><circle cx="20" cy="22" r="2" fill="#ff0055"/><circle cx="55" cy="26" r="3" fill="#ff0055"/><circle cx="60" cy="30" r="2" fill="#ff0055"/><circle cx="50" cy="35" r="2.5" fill="#ff0055"/><circle cx="38" cy="10" r="2.5" fill="#ff0055"/><circle cx="45" cy="12" r="2" fill="#ff0055"/>'
+      ],
+      beard: [
+        // None
+        '',
+        // Stubble
+        '<path d="M8 20 Q38 32 68 20 Q45 30 38 32 Q31 30 8 20Z" fill="#3a2e2e" opacity="0.3"/>',
+        // Short
+        '<path d="M6 18 Q38 40 70 18 Q52 36 38 40 Q24 36 6 18Z" fill="#2a2020" opacity="0.6"/><path d="M20 16 Q38 10 56 16 Q38 22 20 16Z" fill="#2a2020" opacity="0.6"/>',
+        // Full
+        '<path d="M4 16 Q38 44 72 16 Q50 40 38 44 Q26 40 4 16Z" fill="#1a1212" opacity="0.92"/><path d="M18 14 Q38 6 58 14 Q38 20 18 14Z" fill="#1a1212" opacity="0.95"/>',
+        // Goatee
+        '<path d="M30 20 Q38 42 46 20 Q38 46 30 20Z" fill="#1e1616" opacity="0.9"/><path d="M28 18 Q38 12 48 18 Q38 24 28 18Z" fill="#1e1616" opacity="0.9"/>'
+      ],
+      mustache: [
+        // None
+        '',
+        // Pencil
+        '<path d="M22 22 Q38 18 54 22" stroke="#1a1212" stroke-width="3" fill="none" stroke-linecap="round"/>',
+        // Chevron
+        '<path d="M14 20 Q28 12 38 18 Q48 12 62 20 Q48 22 38 20 Q28 22 14 20Z" fill="#1a1212" opacity="0.9"/>',
+        // Walrus
+        '<path d="M10 18 Q28 8 38 14 Q48 8 66 18 Q52 28 38 32 Q24 28 10 18Z" fill="#1a1212" opacity="0.92"/>',
+        // Handlebar
+        '<path d="M16 18 Q28 10 38 16 Q48 10 60 18 Q50 22 38 18 Q26 22 16 18Z" fill="#1a1212" opacity="0.9"/><path d="M16 18 Q6 14 4 6 Q10 14 16 18Z" fill="#1a1212" opacity="0.9"/><path d="M60 18 Q70 14 72 6 Q66 14 60 18Z" fill="#1a1212" opacity="0.9"/>'
+      ],
+      skin: [
+        '<rect x="20" y="10" width="36" height="24" rx="4" fill="rgba(0,240,255,0.03)" stroke="#00f0ff" stroke-width="1"/>',
+        '<rect x="20" y="10" width="36" height="24" rx="4" fill="url(#skin-2)" stroke="#d49b7d" stroke-width="1"/>',
+        '<rect x="20" y="10" width="36" height="24" rx="4" fill="url(#skin-3)" stroke="#bd855b" stroke-width="1"/>',
+        '<rect x="20" y="10" width="36" height="24" rx="4" fill="url(#skin-4)" stroke="#8a5c36" stroke-width="1"/>',
+        '<rect x="20" y="10" width="36" height="24" rx="4" fill="url(#skin-5)" stroke="#542d0b" stroke-width="1"/>',
+        '<rect x="20" y="10" width="36" height="24" rx="4" fill="url(#skin-6)" stroke="#240d00" stroke-width="1"/>'
+      ],
+      gender: [
+        '<circle cx="38" cy="22" r="10" fill="rgba(255,255,255,0.8)"/><text x="38" y="27" font-size="14" fill="#000" text-anchor="middle" font-family="sans-serif">N</text>',
+        '<circle cx="38" cy="22" r="10" fill="#ff99cc"/><text x="38" y="27" font-size="14" fill="#fff" text-anchor="middle" font-family="sans-serif">♀</text>',
+        '<circle cx="38" cy="22" r="10" fill="#6699ff"/><text x="38" y="27" font-size="14" fill="#fff" text-anchor="middle" font-family="sans-serif">♂</text>',
+        '<circle cx="38" cy="22" r="10" fill="#555"/><text x="38" y="26" font-size="12" fill="#fff" text-anchor="middle" font-family="sans-serif">🧔</text>'
+      ]
     };
     const shapes = defs[part];
     return `<svg viewBox="0 0 76 44" xmlns="http://www.w3.org/2000/svg" style="width:76px;height:44px">${shapes[idx] || shapes[0]}</svg>`;
@@ -1492,7 +1827,8 @@
     if (type === 'width') { document.getElementById('sv3').textContent = val; adj.w = val; }
     PARTS[activePart].adj = adj;
 
-    const g = document.getElementById(activePart + '-group');
+    const groupID = activePart === 'beard' ? 'beard-standalone-group' : (activePart + '-group');
+    const g = document.getElementById(groupID);
     if (g) {
       g.style.transformBox = 'fill-box';
       g.style.transformOrigin = 'center';
@@ -1507,7 +1843,8 @@
       PARTS[p].cur = 0;
       PARTS[p].adj = { s: 100, v: 0, w: 100 };
       PARTS[p].variants[0].draw(svg);
-      const g = document.getElementById(p + '-group');
+      const groupID = p === 'beard' ? 'beard-standalone-group' : (p + '-group');
+      const g = document.getElementById(groupID);
       if (g) g.style.transform = 'none';
     });
     if (document.querySelector('.part-btn.active')) {
@@ -1530,10 +1867,13 @@
       ctx.drawImage(img, 0, 0, c.width, c.height);
       URL.revokeObjectURL(url);
       const data = c.toDataURL('image/png');
+      // Map gender selection to backend filter value
+      const genderFilter = window._selectedGender || 'any';
+      const genderLabel = genderFilter === 'female' ? '♀ FEMALE' : genderFilter === 'male' ? '♂ MALE' : '⚥ ALL';
       fetch('/save_composite', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ image: data })
+        body: JSON.stringify({ image: data, gender: genderFilter })
       }).then(r => r.json()).then(resp => {
         document.getElementById('ppct').textContent = 'DONE';
         document.getElementById('pfill').style.width = '100%';
@@ -1542,9 +1882,8 @@
         if (resp.error || !resp.matches || resp.matches.length === 0) {
           resContainer.innerHTML = `<div style="color:var(--danger);font-size:12px;text-align:center;padding:16px;">${resp.error || 'No match found. Try drawing a more detailed face.'}</div>`;
         } else {
-          // Store matches globally so onclick can reference by index safely (avoids % encoding issues)
           window._matches = resp.matches;
-          let html = `<div class="r-label" style="text-align:center;">TOP MATCHES</div>`;
+          let html = `<div class="r-label" style="text-align:center;">TOP MATCHES <span style="font-size:9px;background:rgba(0,240,255,0.15);padding:2px 8px;border-radius:3px;border:1px solid var(--border);margin-left:8px;letter-spacing:1px;">${genderLabel}</span></div>`;
           resp.matches.forEach((m, i) => {
             const conf = Math.max(0, Math.min(100, Math.round((1 - m.distance) * 100)));
             html += `
@@ -1641,4 +1980,29 @@
   }
 
   renderVariants('eyes');
+
+  function pollDbStats() {
+    fetch('/api/db/stats')
+      .then(r => r.json())
+      .then(data => {
+        const st = document.getElementById('db-stats');
+        const dot = document.getElementById('db-dot');
+        if (data.cache_ready) {
+          st.innerHTML = `SQLITE CONNECTED &bull; ${data.total.toLocaleString()} INDEXED &bull; ${data.size_mb}MB`;
+          dot.style.background = 'var(--accent)';
+          dot.style.boxShadow = 'var(--glow)';
+        } else {
+          st.innerHTML = `INDEXING DB...`;
+          dot.style.background = '#ffaa00';
+          dot.style.boxShadow = '0 0 10px #ffaa00';
+        }
+      })
+      .catch(e => {
+        document.getElementById('db-stats').innerHTML = `SQLITE OFFLINE`;
+        document.getElementById('db-dot').style.background = 'var(--danger)';
+      });
+  }
+  pollDbStats();
+  setInterval(pollDbStats, 10000); // refresh every 10s
+
 </script>
