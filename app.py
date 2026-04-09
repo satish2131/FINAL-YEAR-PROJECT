@@ -1,6 +1,7 @@
 import os
 import time
 import base64
+from datetime import datetime
 import numpy as np
 import face_recognition
 from flask import Flask, request, redirect, url_for, send_from_directory, jsonify
@@ -33,6 +34,10 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 all_criminals = []
 _enc_matrix = None          # (N, 128) full matrix
 _gender_index = {}          # {'male': [indices], 'female': [indices], 'unknown': [indices]}
+
+# ── Search history (in-memory, persists while server runs) ───────────────────
+search_history = []         # list of dicts, newest first
+_search_counter = 0         # auto-increment sketch ID
 
 
 def _load_encodings():
@@ -121,7 +126,12 @@ def allowed_file(filename):
 
 @app.route('/')
 def index():
-    return redirect(url_for('interactive'))
+    return redirect(url_for('admin_portal'))
+
+
+@app.route('/admin')
+def admin_portal():
+    return send_from_directory(BASE_DIR, 'admin_dashboard.html')
 
 
 @app.route('/interactive')
@@ -137,6 +147,11 @@ def uploaded_file(filename):
 @app.route('/dataset/<path:filename>')
 def dataset_file(filename):
     return send_from_directory(DATASET_FOLDER, filename)
+
+
+@app.route('/assets/<path:filename>')
+def serve_asset(filename):
+    return send_from_directory(BASE_DIR, filename)
 
 
 # ── Face-matching routes ──────────────────────────────────────────────────────
@@ -164,6 +179,7 @@ def upload():
 @app.route('/save_composite', methods=['POST'])
 def save_composite():
     """Receive a base64 PNG from the UI, save it, run gender-filtered in-memory matching, return JSON."""
+    global _search_counter
     data = None
     if request.is_json:
         payload = request.get_json()
@@ -185,12 +201,50 @@ def save_composite():
         f.write(img_bytes)
     enc = get_face_encoding_from_image(out_path)
     if enc is None:
+        # Record failed search in history
+        _search_counter += 1
+        search_history.insert(0, {
+            'id': f'SKT-{_search_counter:03d}',
+            'date': datetime.now().strftime('%Y-%m-%d %H:%M'),
+            'gender': gender_filter.capitalize() if gender_filter != 'any' else 'Any',
+            'status': 'No Match',
+            'matchCount': 0,
+            'topMatch': None,
+        })
         return jsonify({'query': fname, 'matches': [], 'error': 'No face detected in composite sketch'})
     matches = fast_match(enc, top_k=5, gender_filter=gender_filter)
+
+    # ── Record this search in history ─────────────────────────────────────
+    _search_counter += 1
+    top = None
+    if matches:
+        conf = max(0, min(100, round((1 - matches[0]['distance']) * 100, 1)))
+        top = {'name': matches[0]['name'], 'confidence': conf}
+    search_history.insert(0, {
+        'id': f'SKT-{_search_counter:03d}',
+        'date': datetime.now().strftime('%Y-%m-%d %H:%M'),
+        'gender': gender_filter.capitalize() if gender_filter != 'any' else 'Any',
+        'status': 'Matched' if matches else 'No Match',
+        'matchCount': len(matches),
+        'topMatch': top,
+        'matches': matches,              # full match list for detail view
+    })
+    # ─────────────────────────────────────────────────────────────────────
+
     return jsonify({'query': fname, 'matches': matches, 'gender_filter': gender_filter})
 
 
 # ── SQLite Database API ───────────────────────────────────────────────────────
+
+@app.route('/api/search/history', methods=['GET'])
+def api_search_history():
+    """Return the search history (newest first). Used by the admin dashboard."""
+    return jsonify({
+        'total': len(search_history),
+        'matched': sum(1 for h in search_history if h['status'] == 'Matched'),
+        'history': search_history,
+    })
+
 
 @app.route('/api/db/stats', methods=['GET'])
 def api_db_stats():

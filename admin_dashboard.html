@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>FaceID Forensics — Admin Portal</title>
+<meta name="description" content="Facial Recognition & Reconstruction System — Secure Admin Portal"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d1117;--card:#161b22;--border:#21262d;--fg:#e6edf3;
+  --muted:#8b949e;--cyan:#00d4ff;--cyan-dim:rgba(0,212,255,.15);
+  --success:#3fb950;--warning:#d29922;--danger:#f85149;
+  --radius:8px;
+  font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+}
+body{background:var(--bg);color:var(--fg);min-height:100vh;overflow-x:hidden}
+a{color:var(--cyan);text-decoration:none}
+
+/* ═══════════════════════════════════════════════════════════
+   LAYER 1 — LOGIN PAGE
+   ═══════════════════════════════════════════════════════════ */
+#login-page{display:flex;align-items:center;justify-content:center;min-height:100vh;position:relative;overflow:hidden}
+#login-page .bg-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
+#login-page .bg-overlay{position:absolute;inset:0;background:rgba(7,10,19,.55);z-index:1}
+.scan-line{position:absolute;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);animation:scan 3s ease-in-out infinite;pointer-events:none}
+@keyframes scan{0%,100%{top:-5%;opacity:.3}50%{top:105%;opacity:.8}}
+.login-card{position:relative;z-index:2;width:100%;max-width:400px;margin:0 16px;background:rgba(255,255,255,0.03);backdrop-filter:blur(24px) saturate(150%);-webkit-backdrop-filter:blur(24px) saturate(150%);border:1px solid rgba(255,255,255,0.08);border-top:1px solid rgba(255,255,255,0.15);border-bottom:1px solid rgba(0,212,255,0.15);border-radius:24px;padding:44px 36px;box-shadow:0 30px 60px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.1)}
+.login-icon{width:64px;height:64px;margin:0 auto 16px;border-radius:50%;background:var(--cyan-dim);border:1px solid rgba(0,212,255,.3);display:flex;align-items:center;justify-content:center;animation:pulse-glow 2s ease-in-out infinite}
+@keyframes pulse-glow{0%,100%{box-shadow:0 0 10px rgba(0,212,255,.1)}50%{box-shadow:0 0 25px rgba(0,212,255,.3)}}
+.login-card h1{text-align:center;font-size:1.5rem;font-weight:700;text-shadow:0 0 20px rgba(0,212,255,.4);margin-bottom:4px}
+.login-card .subtitle{text-align:center;color:var(--muted);font-size:.85rem;margin-bottom:28px}
+#login-page label{display:block;font-size:.8rem;color:var(--muted);margin-bottom:4px}
+#login-page input[type=email],#login-page input[type=password],#login-page input[type=text]{width:100%;padding:12px 14px;background:rgba(0,0,0,0.3);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.06);border-top:1px solid rgba(0,0,0,0.4);border-bottom:1px solid rgba(255,255,255,0.1);border-radius:8px;color:var(--fg);font-size:.9rem;outline:none;transition:border .2s, background .2s, box-shadow .2s}
+#login-page input:focus{border-color:var(--cyan);background:rgba(0,0,0,0.5);box-shadow:0 0 15px rgba(0,212,255,0.1)}
+.field{margin-bottom:16px;position:relative}
+.toggle-pw{position:absolute;right:10px;top:28px;background:none;border:none;color:var(--muted);cursor:pointer;font-size:.75rem}
+.toggle-pw:hover{color:var(--fg)}
+.error-msg{background:rgba(248,81,73,.1);border:1px solid rgba(248,81,73,.25);color:var(--danger);font-size:.82rem;padding:10px 12px;border-radius:var(--radius);margin-bottom:14px;display:none}
+.btn{width:100%;padding:11px;border:none;border-radius:var(--radius);font-size:.9rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s}
+.btn-primary{background:var(--cyan);color:var(--bg);box-shadow:0 0 20px rgba(0,212,255,.15)}
+.btn-primary:hover{filter:brightness(1.1);box-shadow:0 0 30px rgba(0,212,255,.25)}
+.btn-primary:disabled{opacity:.6;cursor:wait}
+.login-footer{margin-top:20px;padding-top:16px;border-top:1px solid var(--border);text-align:center;font-size:.72rem;color:var(--muted)}
+
+/* ═══════════════════════════════════════════════════════════
+   LAYER 2 — INTERACTIVE COMPOSITE (embedded via iframe)
+   ═══════════════════════════════════════════════════════════ */
+#interactive-page{display:none;position:relative;height:100vh;width:100%}
+#interactive-page iframe{width:100%;height:100%;border:none}
+.layer-nav{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:100;display:flex;gap:10px}
+.layer-nav .nav-btn{padding:10px 20px;border:1px solid var(--border);border-radius:var(--radius);background:rgba(22,27,34,.92);backdrop-filter:blur(12px);color:var(--muted);font-size:.82rem;font-weight:600;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px}
+.layer-nav .nav-btn:hover{border-color:var(--cyan);color:var(--fg);box-shadow:0 0 20px rgba(0,212,255,.15)}
+.layer-nav .nav-btn.active{border-color:var(--cyan);color:var(--cyan);background:rgba(0,212,255,.08)}
+
+/* ═══════════════════════════════════════════════════════════
+   LAYER 3 — ADMIN DASHBOARD
+   ═══════════════════════════════════════════════════════════ */
+#dashboard-page{display:none}
+header{background:rgba(22,27,34,.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:50}
+.header-inner{max-width:1200px;margin:0 auto;padding:0 16px;height:52px;display:flex;align-items:center;justify-content:space-between}
+.header-brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:1rem}
+.header-brand svg{color:var(--cyan)}
+.badge-admin{font-size:.65rem;padding:2px 8px;border-radius:10px;border:1px solid rgba(0,212,255,.3);color:var(--cyan);font-weight:600;letter-spacing:.5px}
+.header-right{display:flex;align-items:center;gap:14px;font-size:.82rem}
+.status-dot-header{width:6px;height:6px;border-radius:50%;background:var(--success);display:inline-block;margin-right:4px}
+.btn-ghost{background:none;border:none;color:var(--muted);cursor:pointer;font-size:.82rem;padding:6px 10px;border-radius:var(--radius);display:flex;align-items:center;gap:4px}
+.btn-ghost:hover{color:var(--fg);background:rgba(255,255,255,.05)}
+
+.container{max-width:1200px;margin:0 auto;padding:24px 16px}
+
+/* Stats */
+.dash-stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:24px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;display:flex;align-items:center;gap:12px;transition:border-color .3s,box-shadow .3s}
+.stat-card:hover{border-color:rgba(0,212,255,.3);box-shadow:0 0 20px rgba(0,212,255,.08)}
+.stat-icon{width:40px;height:40px;border-radius:8px;background:var(--cyan-dim);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.stat-value{font-size:1.5rem;font-weight:700;line-height:1.2}
+.stat-label{font-size:.75rem;color:var(--muted)}
+
+/* Table Card */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.card-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;font-weight:600}
+.card-header svg{color:var(--cyan)}
+table{width:100%;border-collapse:collapse;font-size:.85rem}
+th{text-align:left;padding:12px 16px;color:var(--muted);font-weight:500;border-bottom:1px solid var(--border)}
+td{padding:12px 16px;border-bottom:1px solid rgba(33,38,45,.5)}
+tr:hover td{background:rgba(255,255,255,.02)}
+tr{cursor:pointer;transition:background .15s}
+.mono{font-family:'Courier New',monospace;color:var(--cyan)}
+.badge-sm{font-size:.7rem;padding:2px 8px;border-radius:10px;border:1px solid var(--border);display:inline-block}
+.badge-match{background:rgba(63,185,80,.12);color:var(--success);border-color:rgba(63,185,80,.3)}
+.badge-nomatch{background:rgba(248,81,73,.12);color:var(--danger);border-color:rgba(248,81,73,.3)}
+
+/* Case Detail Modal */
+.case-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);z-index:200;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s ease;padding:24px}
+.case-modal-overlay.open{opacity:1;pointer-events:all}
+.case-modal{background:rgba(22,27,34,.97);border:1px solid var(--border);border-radius:16px;width:100%;max-width:560px;max-height:85vh;overflow:hidden;display:flex;flex-direction:column;transform:translateY(30px) scale(.95);transition:transform .35s cubic-bezier(.34,1.56,.64,1),opacity .3s ease;opacity:0;box-shadow:0 40px 80px rgba(0,0,0,.8),0 0 60px rgba(0,212,255,.06)}
+.case-modal-overlay.open .case-modal{transform:translateY(0) scale(1);opacity:1}
+.case-modal-head{padding:20px 24px;border-bottom:1px solid var(--border);background:linear-gradient(135deg,rgba(0,212,255,.06),transparent);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.case-modal-head-left{display:flex;align-items:center;gap:12px}
+.case-modal-icon{width:40px;height:40px;border-radius:10px;background:var(--cyan-dim);border:1px solid rgba(0,212,255,.25);display:flex;align-items:center;justify-content:center}
+.case-modal-id{font-family:'Courier New',monospace;font-size:1.1rem;font-weight:700;color:var(--cyan);text-shadow:0 0 16px rgba(0,212,255,.4)}
+.case-modal-date{font-size:.75rem;color:var(--muted);margin-top:2px}
+.case-modal-close{background:none;border:1px solid var(--border);color:var(--muted);width:32px;height:32px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;font-size:1rem}
+.case-modal-close:hover{border-color:var(--danger);color:var(--danger);background:rgba(248,81,73,.08)}
+.case-modal-meta{display:flex;gap:10px;padding:14px 24px;border-bottom:1px solid var(--border);flex-shrink:0}
+.case-meta-tag{font-size:.72rem;padding:4px 12px;border-radius:20px;font-weight:600;letter-spacing:.5px}
+.case-meta-gender{background:rgba(0,212,255,.1);color:var(--cyan);border:1px solid rgba(0,212,255,.25)}
+.case-meta-status-match{background:rgba(63,185,80,.1);color:var(--success);border:1px solid rgba(63,185,80,.25)}
+.case-meta-status-nomatch{background:rgba(248,81,73,.1);color:var(--danger);border:1px solid rgba(248,81,73,.25)}
+.case-meta-conf{background:rgba(210,153,34,.1);color:var(--warning);border:1px solid rgba(210,153,34,.25)}
+.case-modal-body{padding:20px 24px;overflow-y:auto;flex:1}
+.case-modal-body::-webkit-scrollbar{width:4px}
+.case-modal-body::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+.case-section-title{font-size:.7rem;font-weight:700;color:var(--cyan);letter-spacing:2.5px;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.case-section-title::after{content:'';flex:1;height:1px;background:var(--border)}
+.match-item{display:flex;align-items:center;gap:12px;padding:12px 14px;background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:10px;margin-bottom:8px;transition:all .2s}
+.match-item:hover{border-color:rgba(0,212,255,.3);transform:translateX(4px)}
+.match-rank{width:32px;height:32px;border-radius:50%;background:var(--cyan-dim);border:1px solid rgba(0,212,255,.2);display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;color:var(--cyan);flex-shrink:0}
+.match-info{flex:1;min-width:0}
+.match-name{font-size:.85rem;font-weight:600;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.match-dist{font-size:.72rem;color:var(--muted);font-family:'Courier New',monospace}
+.match-conf-wrap{text-align:right;flex-shrink:0}
+.match-conf-val{font-size:.9rem;font-weight:700;font-family:'Courier New',monospace}
+.match-conf-label{font-size:.6rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
+.match-conf-bar{width:60px;height:4px;background:rgba(0,0,0,.4);border-radius:2px;margin-top:4px;overflow:hidden}
+.match-conf-bar-fill{height:100%;border-radius:2px;transition:width .6s ease}
+.case-modal-footer{padding:14px 24px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;background:rgba(0,0,0,.2)}
+.case-modal-footer-ts{font-size:.7rem;color:var(--muted);font-family:'Courier New',monospace}
+.case-modal-footer-btn{padding:8px 20px;border:1px solid var(--border);border-radius:var(--radius);background:none;color:var(--muted);font-size:.78rem;font-weight:600;cursor:pointer;letter-spacing:1px;transition:all .2s}
+.case-modal-footer-btn:hover{border-color:var(--cyan);color:var(--cyan)}
+
+/* Page transition animations */
+@keyframes fadeSlideIn{
+  from{opacity:0;transform:translateY(20px)}
+  to{opacity:1;transform:translateY(0)}
+}
+@keyframes fadeSlideOut{
+  from{opacity:1;transform:translateY(0)}
+  to{opacity:0;transform:translateY(-20px)}
+}
+.page-enter{animation:fadeSlideIn .4s ease-out forwards}
+.page-exit{animation:fadeSlideOut .3s ease-in forwards}
+
+@media(max-width:640px){
+  .case-modal{max-width:95vw;max-height:90vh}
+  .dash-stats-grid{grid-template-columns:1fr 1fr}
+  th:nth-child(6),td:nth-child(6),th:nth-child(7),td:nth-child(7){display:none}
+  .layer-nav{bottom:12px;right:12px}
+  .layer-nav .nav-btn{padding:8px 14px;font-size:.75rem}
+}
+
+/* Profile Detail Modal (opens from match items) */
+.profile-overlay{position:fixed;inset:0;background:rgba(0,0,0,.82);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);z-index:300;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s ease;padding:20px}
+.profile-overlay.open{opacity:1;pointer-events:all}
+.profile-modal{background:rgba(7,10,19,.98);border:1px solid rgba(0,212,255,.2);border-radius:20px;max-width:540px;width:100%;position:relative;box-shadow:0 40px 100px rgba(0,0,0,.95),0 0 60px rgba(0,212,255,.08);transform:translateY(40px) scale(.93);transition:transform .4s cubic-bezier(.34,1.56,.64,1),opacity .3s ease;opacity:0;max-height:90vh;overflow-y:auto;overflow-x:hidden}
+.profile-overlay.open .profile-modal{transform:translateY(0) scale(1);opacity:1}
+.profile-modal::-webkit-scrollbar{width:4px}
+.profile-modal::-webkit-scrollbar-thumb{background:rgba(0,212,255,.15);border-radius:4px}
+.pm-header{background:linear-gradient(135deg,rgba(0,212,255,.12),rgba(0,0,0,.4));border-bottom:1px solid var(--border);padding:24px 28px 20px;border-radius:20px 20px 0 0;position:relative;overflow:hidden}
+.pm-header::before{content:'LFIM // IDENTITY FILE';position:absolute;top:12px;right:16px;font-family:'Courier New',monospace;font-size:9px;font-weight:700;color:rgba(0,212,255,.35);letter-spacing:2px}
+.pm-header-grid{display:flex;gap:22px;align-items:flex-start}
+.pm-photo-wrap{flex-shrink:0;position:relative}
+.pm-photo{width:110px;height:110px;border-radius:12px;object-fit:cover;border:2px solid var(--cyan);box-shadow:0 0 30px rgba(0,212,255,.35),0 4px 20px rgba(0,0,0,.8);display:block}
+.pm-photo-scan{position:absolute;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);animation:scan 3s ease-in-out infinite;opacity:.7;z-index:2;top:0}
+.pm-badges{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.pm-badge{font-family:'Courier New',monospace;font-size:8px;font-weight:700;padding:3px 8px;border-radius:3px;letter-spacing:1.5px;text-transform:uppercase}
+.pm-badge-rank{background:rgba(0,212,255,.15);color:var(--cyan);border:1px solid rgba(0,212,255,.3)}
+.pm-badge-db{background:rgba(255,255,255,.06);color:var(--muted);border:1px solid var(--border)}
+.pm-header-info{flex:1;min-width:0}
+.pm-id-label{font-family:'Courier New',monospace;font-size:9px;font-weight:700;color:rgba(0,212,255,.5);letter-spacing:3px;text-transform:uppercase;margin-bottom:6px}
+.pm-name{font-size:24px;font-weight:800;text-transform:capitalize;line-height:1.2;margin-bottom:10px;word-break:break-word}
+.pm-status-row{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.pm-status-dot{width:7px;height:7px;border-radius:50%;background:#00ff88;box-shadow:0 0 8px #00ff88;animation:pulse-glow 2s infinite}
+.pm-status-text{font-size:11px;font-weight:600;color:#00ff88;letter-spacing:1px}
+.pm-id-num{font-family:'Courier New',monospace;font-size:11px;color:var(--muted);letter-spacing:2px}
+.pm-body{padding:24px 28px;display:flex;flex-direction:column;gap:20px}
+.pm-conf-section{background:rgba(0,212,255,.04);border:1px solid rgba(0,212,255,.15);border-radius:12px;padding:18px 20px}
+.pm-conf-title{font-size:10px;font-weight:700;color:var(--cyan);letter-spacing:3px;text-transform:uppercase;margin-bottom:14px}
+.pm-conf-big{font-family:'Courier New',monospace;font-size:40px;font-weight:800;color:var(--cyan);text-shadow:0 0 30px rgba(0,212,255,.6);line-height:1;margin-bottom:4px}
+.pm-conf-sub{font-size:11px;color:var(--muted);margin-bottom:14px}
+.pm-conf-track{height:8px;background:rgba(0,0,0,.6);border-radius:4px;overflow:hidden}
+.pm-conf-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,#005f6b,var(--cyan));transition:width 1.2s cubic-bezier(.4,0,.2,1);box-shadow:0 0 12px rgba(0,212,255,.5)}
+.pm-stats-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.pm-stat-box{background:rgba(0,0,0,.4);border:1px solid var(--border);border-radius:10px;padding:14px 12px;text-align:center;transition:border-color .2s}
+.pm-stat-box:hover{border-color:rgba(0,212,255,.3)}
+.pm-stat-val{font-family:'Courier New',monospace;font-size:16px;font-weight:700;margin-bottom:4px}
+.pm-stat-label{font-size:9px;font-weight:700;color:var(--muted);letter-spacing:2px;text-transform:uppercase}
+.pm-bio-title{font-size:10px;font-weight:700;color:var(--cyan);letter-spacing:3px;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.pm-bio-title::after{content:'';flex:1;height:1px;background:var(--border)}
+.pm-bio-row{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:rgba(0,0,0,.3);border-radius:8px;border:1px solid var(--border);margin-bottom:8px}
+.pm-bio-label{font-size:11px;color:var(--muted);font-weight:500}
+.pm-bio-val{font-family:'Courier New',monospace;font-size:11px;font-weight:600;text-align:right;max-width:60%;word-break:break-all}
+.pm-footer{padding:16px 28px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;border-radius:0 0 20px 20px;background:rgba(0,0,0,.3)}
+.pm-close-btn{background:none;border:1px solid var(--border);color:var(--muted);font-size:12px;font-weight:700;padding:8px 20px;border-radius:6px;cursor:pointer;letter-spacing:1.5px;text-transform:uppercase;transition:all .2s}
+.pm-close-btn:hover{border-color:rgba(0,212,255,.4);color:var(--fg)}
+.pm-timestamp{font-family:'Courier New',monospace;font-size:10px;color:var(--muted)}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════
+     LAYER 1 — LOGIN PAGE
+     ═══════════════════════════════════════════════════════════ -->
+<div id="login-page">
+  <video class="bg-video" autoplay muted loop playsinline>
+    <source src="/assets/login.mp4" type="video/mp4">
+  </video>
+  <div class="bg-overlay"></div>
+  <div class="scan-line"></div>
+  <div class="login-card">
+    <div class="login-icon">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--cyan)">
+        <path d="M12 10a2 2 0 0 0-2 2c0 1.02.76 2 2 2 1.02 0 2-.76 2-2 0-1.02-1-2-2-2Z"/><path d="M21 12a9 9 0 1 0-18 0 9 9 0 0 0 18 0Z"/><path d="M12 3v2m0 14v2M3 12h2m14 0h2"/>
+      </svg>
+    </div>
+    <h1>FaceID Forensics</h1>
+    <p class="subtitle">Facial Recognition &amp; Reconstruction System</p>
+
+    <form id="login-form" onsubmit="handleLogin(event)">
+      <div class="field">
+        <label for="email">Officer Email</label>
+        <input type="email" id="email" placeholder="admin@faceid.gov" required/>
+      </div>
+      <div class="field">
+        <label for="password">Access Code</label>
+        <input type="password" id="password" placeholder="••••••••" required/>
+        <button type="button" class="toggle-pw" onclick="togglePw()">SHOW</button>
+      </div>
+      <div class="error-msg" id="login-error"></div>
+      <button type="submit" class="btn btn-primary" id="login-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg>
+        Secure Login
+      </button>
+    </form>
+    <div class="login-footer">🔒 Authorized Personnel Only — All access is logged &amp; monitored</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     LAYER 2 — INTERACTIVE COMPOSITE BUILDER (iframe)
+     ═══════════════════════════════════════════════════════════ -->
+<div id="interactive-page">
+  <iframe id="interactive-frame" src="/interactive" title="Facial Composite Builder"></iframe>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     LAYER 3 — ADMIN DASHBOARD
+     ═══════════════════════════════════════════════════════════ -->
+<div id="dashboard-page">
+  <header>
+    <div class="header-inner">
+      <div class="header-brand">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--cyan)">
+          <path d="M12 10a2 2 0 0 0-2 2c0 1.02.76 2 2 2 1.02 0 2-.76 2-2 0-1.02-1-2-2-2Z"/><path d="M21 12a9 9 0 1 0-18 0 9 9 0 0 0 18 0Z"/>
+        </svg>
+        FaceID Forensics
+        <span class="badge-admin">ADMIN</span>
+      </div>
+      <div class="header-right">
+        <span><span class="status-dot-header"></span>System Online</span>
+        <button class="btn-ghost" onclick="handleLogout()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Logout
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="dash-stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+        <div><div class="stat-value" id="dash-total-searches">—</div><div class="stat-label">Total Searches</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:rgba(63,185,80,.12)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+        <div><div class="stat-value" id="dash-matches-found">—</div><div class="stat-label">Matches Found</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:rgba(210,153,34,.12)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--warning)" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>
+        <div><div class="stat-value" id="dash-sketches">—</div><div class="stat-label">Sketches Created</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg></div>
+        <div><div class="stat-value" id="dash-db-records">—</div><div class="stat-label">Database Records</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Sketch &amp; Match History
+      </div>
+      <div style="overflow-x:auto">
+        <table>
+          <thead>
+            <tr><th>Sketch ID</th><th>Date</th><th>Gender</th><th>Status</th><th>Top Match</th><th>Confidence</th><th style="text-align:right">Details</th></tr>
+          </thead>
+          <tbody id="history-body"></tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     CASE DETAIL POPUP MODAL
+     ═══════════════════════════════════════════════════════════ -->
+<div class="case-modal-overlay" id="caseModal" onclick="closeCaseModal(event)">
+  <div class="case-modal">
+    <div class="case-modal-head">
+      <div class="case-modal-head-left">
+        <div class="case-modal-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg>
+        </div>
+        <div>
+          <div class="case-modal-id" id="cm-id">SKT-001</div>
+          <div class="case-modal-date" id="cm-date">2026-04-09 14:32</div>
+        </div>
+      </div>
+      <button class="case-modal-close" onclick="document.getElementById('caseModal').classList.remove('open')" title="Close">✕</button>
+    </div>
+    <div class="case-modal-meta" id="cm-meta"></div>
+    <div class="case-modal-body" id="cm-body"></div>
+    <div class="case-modal-footer">
+      <div class="case-modal-footer-ts" id="cm-ts"></div>
+      <button class="case-modal-footer-btn" onclick="document.getElementById('caseModal').classList.remove('open')">CLOSE RECORD</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     PROFILE DETAIL MODAL (opens from match items)
+     ═══════════════════════════════════════════════════════════ -->
+<div class="profile-overlay" id="profileModal" onclick="closeProfile(event)">
+  <div class="profile-modal">
+    <div class="pm-header">
+      <div class="pm-header-grid">
+        <div class="pm-photo-wrap">
+          <div class="pm-photo-scan"></div>
+          <img id="pm-photo" class="pm-photo" src="" alt="Subject Photo">
+          <div class="pm-badges" id="pm-badges"></div>
+        </div>
+        <div class="pm-header-info">
+          <div class="pm-id-label">Subject Record</div>
+          <div class="pm-name" id="pm-name"></div>
+          <div class="pm-status-row">
+            <div class="pm-status-dot"></div>
+            <div class="pm-status-text">MATCH FOUND</div>
+          </div>
+          <div class="pm-id-num" id="pm-id-num"></div>
+        </div>
+      </div>
+    </div>
+    <div class="pm-body">
+      <div class="pm-conf-section">
+        <div class="pm-conf-title">Biometric Confidence Score</div>
+        <div class="pm-conf-big" id="pm-conf"></div>
+        <div class="pm-conf-sub" id="pm-conf-sub"></div>
+        <div class="pm-conf-track"><div class="pm-conf-fill" id="pm-conf-fill" style="width:0%"></div></div>
+      </div>
+      <div class="pm-stats-grid">
+        <div class="pm-stat-box"><div class="pm-stat-val" id="pm-s-rank"></div><div class="pm-stat-label">Rank</div></div>
+        <div class="pm-stat-box"><div class="pm-stat-val" id="pm-s-dist"></div><div class="pm-stat-label">Distance</div></div>
+        <div class="pm-stat-box"><div class="pm-stat-val">128-D</div><div class="pm-stat-label">Encoding</div></div>
+      </div>
+      <div>
+        <div class="pm-bio-title">Identity Details</div>
+        <div class="pm-bio-row"><span class="pm-bio-label">Full Name</span><span class="pm-bio-val" id="pm-b-name"></span></div>
+        <div class="pm-bio-row"><span class="pm-bio-label">Match Confidence</span><span class="pm-bio-val" id="pm-b-conf"></span></div>
+        <div class="pm-bio-row"><span class="pm-bio-label">Euclidean Distance</span><span class="pm-bio-val" id="pm-b-dist"></span></div>
+        <div class="pm-bio-row"><span class="pm-bio-label">Similarity Index</span><span class="pm-bio-val" id="pm-b-sim"></span></div>
+        <div class="pm-bio-row"><span class="pm-bio-label">Dataset Source</span><span class="pm-bio-val">LFW (Labeled Faces in the Wild)</span></div>
+        <div class="pm-bio-row"><span class="pm-bio-label">Gender</span><span class="pm-bio-val" id="pm-b-gender"></span></div>
+        <div class="pm-bio-row"><span class="pm-bio-label">Record File</span><span class="pm-bio-val" id="pm-b-file"></span></div>
+      </div>
+    </div>
+    <div class="pm-footer">
+      <div class="pm-timestamp" id="pm-ts"></div>
+      <button class="pm-close-btn" onclick="document.getElementById('profileModal').classList.remove('open')">Close Record</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     FLOATING NAVIGATION (visible on layers 2 & 3)
+     ═══════════════════════════════════════════════════════════ -->
+<div class="layer-nav" id="layer-nav" style="display:none">
+  <button class="nav-btn" id="nav-composite" onclick="showPage('interactive')">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+    Composite Builder
+  </button>
+  <button class="nav-btn" id="nav-dashboard" onclick="showPage('dashboard')">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+    Dashboard
+  </button>
+  <button class="nav-btn" onclick="handleLogout()" style="border-color:rgba(248,81,73,.3);color:var(--danger)">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+    Logout
+  </button>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════
+   LIVE HISTORY — fetched from /api/search/history
+   ═══════════════════════════════════════════════════════════ */
+var historyData = [];
+var selectedId = null;
+var currentPage = 'login';
+var _dashRefreshTimer = null;
+
+/* ═══════════════════════════════════════════════════════════
+   PAGE NAVIGATION
+   ═══════════════════════════════════════════════════════════ */
+function showPage(page) {
+  var login = document.getElementById('login-page');
+  var interactive = document.getElementById('interactive-page');
+  var dashboard = document.getElementById('dashboard-page');
+  var nav = document.getElementById('layer-nav');
+
+  // Hide all pages
+  login.style.display = 'none';
+  interactive.style.display = 'none';
+  dashboard.style.display = 'none';
+
+  // Remove active nav state
+  document.getElementById('nav-composite').classList.remove('active');
+  document.getElementById('nav-dashboard').classList.remove('active');
+
+  // Stop auto-refresh when leaving dashboard
+  if (_dashRefreshTimer) { clearInterval(_dashRefreshTimer); _dashRefreshTimer = null; }
+
+  if (page === 'login') {
+    login.style.display = 'flex';
+    login.classList.add('page-enter');
+    nav.style.display = 'none';
+    currentPage = 'login';
+  } else if (page === 'interactive') {
+    interactive.style.display = 'block';
+    interactive.classList.add('page-enter');
+    nav.style.display = 'flex';
+    document.getElementById('nav-composite').classList.add('active');
+    currentPage = 'interactive';
+    document.body.style.overflow = 'hidden';
+  } else if (page === 'dashboard') {
+    dashboard.style.display = 'block';
+    dashboard.classList.add('page-enter');
+    nav.style.display = 'flex';
+    document.getElementById('nav-dashboard').classList.add('active');
+    currentPage = 'dashboard';
+    document.body.style.overflow = 'auto';
+    fetchAndRenderDashboard();
+    // Auto-refresh every 5 seconds while on dashboard
+    _dashRefreshTimer = setInterval(fetchAndRenderDashboard, 5000);
+  }
+
+  setTimeout(function() {
+    login.classList.remove('page-enter');
+    interactive.classList.remove('page-enter');
+    dashboard.classList.remove('page-enter');
+  }, 500);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   LOGIN
+   ═══════════════════════════════════════════════════════════ */
+function handleLogin(e) {
+  e.preventDefault();
+  var email = document.getElementById('email').value;
+  var pw = document.getElementById('password').value;
+  var err = document.getElementById('login-error');
+  var btn = document.getElementById('login-btn');
+  err.style.display = 'none';
+  btn.disabled = true;
+  btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin .8s linear infinite"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg> Authenticating...';
+
+  setTimeout(function() {
+    if (email === 'admin@faceid.gov' && pw === 'admin123') {
+      showPage('interactive');
+    } else {
+      err.textContent = 'Invalid credentials. Try admin@faceid.gov / admin123';
+      err.style.display = 'block';
+    }
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg> Secure Login';
+  }, 800);
+}
+
+function togglePw() {
+  var inp = document.getElementById('password');
+  var btn = inp.nextElementSibling;
+  if (inp.type === 'password') { inp.type = 'text'; btn.textContent = 'HIDE'; }
+  else { inp.type = 'password'; btn.textContent = 'SHOW'; }
+}
+
+function handleLogout() {
+  document.body.style.overflow = 'auto';
+  document.getElementById('email').value = '';
+  document.getElementById('password').value = '';
+  selectedId = null;
+  if (_dashRefreshTimer) { clearInterval(_dashRefreshTimer); _dashRefreshTimer = null; }
+  showPage('login');
+}
+
+/* ═══════════════════════════════════════════════════════════
+   DASHBOARD — Fetch Live Data & Render
+   ═══════════════════════════════════════════════════════════ */
+function fetchAndRenderDashboard() {
+  // Fetch search history from backend
+  fetch('/api/search/history')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      historyData = data.history || [];
+      document.getElementById('dash-total-searches').textContent = (data.total || 0).toLocaleString();
+      document.getElementById('dash-matches-found').textContent = (data.matched || 0).toLocaleString();
+      document.getElementById('dash-sketches').textContent = (data.total || 0).toLocaleString();
+      renderHistory();
+    })
+    .catch(function() {
+      // If API fails, show empty state
+      document.getElementById('dash-total-searches').textContent = '—';
+      document.getElementById('dash-matches-found').textContent = '—';
+      document.getElementById('dash-sketches').textContent = '—';
+    });
+
+  // Fetch DB record count
+  fetch('/api/db/stats')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      document.getElementById('dash-db-records').textContent = (data.total || 0).toLocaleString();
+    })
+    .catch(function() {
+      document.getElementById('dash-db-records').textContent = '—';
+    });
+}
+
+/* ═══════════════════════════════════════════════════════════
+   DASHBOARD — History Table (renders from live historyData)
+   ═══════════════════════════════════════════════════════════ */
+function renderHistory() {
+  var tbody = document.getElementById('history-body');
+  if (historyData.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:32px;font-size:.85rem">No searches yet. Use the Composite Builder to run a search, then come back here.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = historyData.map(function(h) {
+    return '<tr onclick="toggleDetail(\'' + h.id + '\')">' +
+      '<td class="mono">' + h.id + '</td>' +
+      '<td style="color:var(--muted)">' + h.date + '</td>' +
+      '<td><span class="badge-sm">' + h.gender + '</span></td>' +
+      '<td><span class="badge-sm ' + (h.status==='Matched'?'badge-match':'badge-nomatch') + '">' + h.status + '</span></td>' +
+      '<td>' + (h.topMatch ? h.topMatch.name : '—') + '</td>' +
+      '<td>' + (h.topMatch ? '<span style="color:' + (h.topMatch.confidence > 90 ? 'var(--success)' : 'var(--warning)') + '">' + h.topMatch.confidence + '%</span>' : '—') + '</td>' +
+      '<td style="text-align:right;color:var(--muted)">›</td></tr>';
+  }).join('');
+}
+
+function toggleDetail(id) {
+  var item = historyData.find(function(h) { return h.id === id; });
+  if (!item) return;
+
+  // Populate modal header
+  document.getElementById('cm-id').textContent = item.id;
+  document.getElementById('cm-date').textContent = item.date;
+
+  // Meta tags
+  var statusClass = item.status === 'Matched' ? 'case-meta-status-match' : 'case-meta-status-nomatch';
+  var metaHtml = '<span class="case-meta-tag case-meta-gender">' + item.gender + '</span>' +
+    '<span class="case-meta-tag ' + statusClass + '">' + item.status + '</span>';
+  if (item.topMatch) {
+    metaHtml += '<span class="case-meta-tag case-meta-conf">Top: ' + item.topMatch.confidence + '%</span>';
+  }
+  metaHtml += '<span class="case-meta-tag" style="background:rgba(255,255,255,.05);color:var(--muted);border:1px solid var(--border)">' + (item.matchCount || 0) + ' matches</span>';
+  document.getElementById('cm-meta').innerHTML = metaHtml;
+
+  // Body — match list
+  var bodyHtml = '<div class="case-section-title">Match Results</div>';
+
+  if (item.matches && item.matches.length > 0) {
+    item.matches.forEach(function(m, i) {
+      var conf = Math.max(0, Math.min(100, Math.round((1 - m.distance) * 100)));
+      var color = conf > 80 ? 'var(--success)' : conf > 50 ? 'var(--warning)' : 'var(--danger)';
+      var barColor = conf > 80 ? '#3fb950' : conf > 50 ? '#d29922' : '#f85149';
+      bodyHtml += '<div class="match-item" style="cursor:pointer" onclick="openProfile(' + JSON.stringify(m).replace(/"/g, '&quot;') + ',' + (i+1) + ')">' +
+        '<div class="match-rank">#' + (i + 1) + '</div>' +
+        '<div class="match-info">' +
+          '<div class="match-name">' + m.name + '</div>' +
+          '<div class="match-dist">dist: ' + m.distance.toFixed(4) + ' · gender: ' + (m.gender || '—') + '</div>' +
+        '</div>' +
+        '<div class="match-conf-wrap">' +
+          '<div class="match-conf-val" style="color:' + color + '">' + conf + '%</div>' +
+          '<div class="match-conf-label">MATCH</div>' +
+          '<div class="match-conf-bar"><div class="match-conf-bar-fill" style="width:0%;background:' + barColor + '" data-width="' + conf + '%"></div></div>' +
+        '</div>' +
+      '</div>';
+    });
+  } else if (item.topMatch) {
+    var conf = item.topMatch.confidence;
+    var color = conf > 80 ? 'var(--success)' : conf > 50 ? 'var(--warning)' : 'var(--danger)';
+    bodyHtml += '<div class="match-item">' +
+      '<div class="match-rank">#1</div>' +
+      '<div class="match-info"><div class="match-name">' + item.topMatch.name + '</div><div class="match-dist">Top match result</div></div>' +
+      '<div class="match-conf-wrap"><div class="match-conf-val" style="color:' + color + '">' + conf + '%</div><div class="match-conf-label">MATCH</div></div>' +
+    '</div>';
+  } else {
+    bodyHtml += '<div style="text-align:center;padding:32px;color:var(--muted)">' +
+      '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom:8px;opacity:.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>' +
+      '<div style="font-size:.85rem">No matches found for this sketch</div>' +
+    '</div>';
+  }
+
+  document.getElementById('cm-body').innerHTML = bodyHtml;
+  document.getElementById('cm-ts').textContent = 'SEARCHED: ' + item.date;
+
+  // Open modal
+  document.getElementById('caseModal').classList.add('open');
+
+  // Animate confidence bars after modal opens
+  setTimeout(function() {
+    document.querySelectorAll('#cm-body .match-conf-bar-fill').forEach(function(el) {
+      el.style.width = el.getAttribute('data-width');
+    });
+  }, 100);
+}
+
+function closeCaseModal(e) {
+  if (e.target === document.getElementById('caseModal')) {
+    document.getElementById('caseModal').classList.remove('open');
+  }
+}
+
+// Close modal on Escape
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    if (document.getElementById('profileModal').classList.contains('open')) {
+      document.getElementById('profileModal').classList.remove('open');
+    } else {
+      document.getElementById('caseModal').classList.remove('open');
+    }
+  }
+});
+
+/* ═══════════════════════════════════════════════════════════
+   PROFILE MODAL — opens when clicking a match item
+   ═══════════════════════════════════════════════════════════ */
+function openProfile(m, rank) {
+  var conf = Math.max(0, Math.min(100, Math.round((1 - m.distance) * 100)));
+  var similarity = ((1 - m.distance) * 100).toFixed(2);
+  var rankLabels = ['1ST', '2ND', '3RD', '4TH', '5TH'];
+  var confLabels = [
+    { min: 85, label: 'EXTREMELY HIGH — Near Certain Match' },
+    { min: 70, label: 'HIGH CONFIDENCE — Strong Match' },
+    { min: 55, label: 'MODERATE — Possible Match' },
+    { min: 40, label: 'LOW — Weak Similarity' },
+    { min: 0, label: 'VERY LOW — Poor Match' },
+  ];
+  var confSub = 'VERY LOW — Poor Match';
+  for (var i = 0; i < confLabels.length; i++) {
+    if (conf >= confLabels[i].min) { confSub = confLabels[i].label; break; }
+  }
+
+  // Photo
+  document.getElementById('pm-photo').src = '/dataset/' + m.file;
+  document.getElementById('pm-name').textContent = m.name;
+
+  // ID
+  var idHash = Math.abs(m.name.split('').reduce(function(a, c) { return a + c.charCodeAt(0); }, 0)).toString(16).toUpperCase();
+  while (idHash.length < 6) idHash = '0' + idHash;
+  document.getElementById('pm-id-num').textContent = 'ID: LFW-' + idHash;
+
+  // Badges
+  document.getElementById('pm-badges').innerHTML =
+    '<span class="pm-badge pm-badge-rank">' + (rankLabels[rank - 1] || '#' + rank) + '</span>' +
+    '<span class="pm-badge pm-badge-db">LFW DB</span>';
+
+  // Confidence
+  document.getElementById('pm-conf').textContent = conf + '%';
+  document.getElementById('pm-conf-sub').textContent = confSub;
+  var fill = document.getElementById('pm-conf-fill');
+  fill.style.width = '0%';
+  setTimeout(function() { fill.style.width = conf + '%'; }, 80);
+
+  // Stats
+  document.getElementById('pm-s-rank').textContent = rankLabels[rank - 1] || '#' + rank;
+  document.getElementById('pm-s-dist').textContent = m.distance.toFixed(4);
+
+  // Bio rows
+  document.getElementById('pm-b-name').textContent = m.name;
+  document.getElementById('pm-b-conf').textContent = conf + '%';
+  document.getElementById('pm-b-dist').textContent = m.distance.toFixed(6);
+  document.getElementById('pm-b-sim').textContent = similarity + '%';
+  document.getElementById('pm-b-gender').textContent = (m.gender || 'unknown').toUpperCase();
+  document.getElementById('pm-b-file').textContent = m.file;
+
+  // Timestamp
+  document.getElementById('pm-ts').textContent = 'QUERIED: ' + new Date().toLocaleTimeString();
+
+  // Open
+  document.getElementById('profileModal').classList.add('open');
+}
+
+function closeProfile(e) {
+  if (e.target === document.getElementById('profileModal')) {
+    document.getElementById('profileModal').classList.remove('open');
+  }
+}
+</script>
+</body>
+</html>

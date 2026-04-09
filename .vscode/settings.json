@@ -1,0 +1,7 @@
+{
+  "python.defaultInterpreterPath": "C:\\Users\\dsaiv\\miniconda3\\envs\\lfim\\python.exe",
+  "python.analysis.extraPaths": [
+    "C:\\Users\\dsaiv\\miniconda3\\envs\\lfim\\Lib\\site-packages"
+  ],
+  "python.analysis.typeCheckingMode": "off"
+}
