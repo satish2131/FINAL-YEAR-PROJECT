@@ -3,7 +3,6 @@ import time
 import base64
 from datetime import datetime
 import numpy as np
-import face_recognition
 from flask import Flask, request, redirect, url_for, send_from_directory, jsonify
 from werkzeug.utils import secure_filename
 from model.feature_extractor import get_face_encoding_from_image
@@ -46,7 +45,7 @@ def _load_encodings():
     print('[LFIM] Loading encodings from database into memory...')
     try:
         rows = get_all_criminals(DB_PATH)
-        valid = [(r, r['encoding']) for r in rows if r['encoding'] is not None and len(r['encoding']) == 128]
+        valid = [(r, r['encoding']) for r in rows if r['encoding'] is not None and len(r['encoding']) == 512]
         if valid:
             all_criminals = [r for r, _ in valid]
             _enc_matrix = np.array([enc for _, enc in valid], dtype=np.float64)
@@ -76,14 +75,48 @@ _load_encodings()
 # ─────────────────────────────────────────────────────────────────────────────
 
 
+# ── ArcFace threshold calibration (cosine distance scale 0..2) ───────────────
+# ArcFace embeddings are L2-normalised: cosine_dist = 1 - cosine_similarity
+# Strong match: < 0.40 | Possible: 0.40–0.60 | Weak: > 0.60
+_ARCFACE_STRONG  = 0.40
+_ARCFACE_POSSIBLE = 0.60
+
+
+def _cosine_distances(matrix, query):
+    """
+    Vectorized cosine distance between each row of `matrix` and `query`.
+    Both should already be L2-normalised (done inside feature_extractor.py).
+    Returns distances in [0, 2] (0 = identical, 2 = opposite).
+    """
+    # dot product of each row with query
+    similarities = matrix @ query          # shape (N,)
+    return 1.0 - similarities              # cosine distance
+
+
+def _confidence_score(cosine_dist):
+    """Map ArcFace cosine distance → 0–100 % confidence."""
+    if cosine_dist <= _ARCFACE_STRONG:
+        # Strong match zone: 75–100 %
+        conf = 100.0 - (cosine_dist / _ARCFACE_STRONG) * 25.0
+    elif cosine_dist <= _ARCFACE_POSSIBLE:
+        # Possible match zone: 40–74 %
+        ratio = (cosine_dist - _ARCFACE_STRONG) / (_ARCFACE_POSSIBLE - _ARCFACE_STRONG)
+        conf = 74.0 - ratio * 34.0
+    else:
+        # Weak / no match: 0–39 %
+        conf = max(0.0, 39.0 - (cosine_dist - _ARCFACE_POSSIBLE) * 80.0)
+    return round(float(conf), 1)
+
+
 def fast_match(query_encoding, top_k=5, gender_filter='any'):
-    """Vectorized distance search with strict gender filtering.
+    """Cosine-distance search with strict gender filtering.
+    Uses ArcFace 512-D L2-normalised embeddings.
     gender_filter: 'any' | 'male' | 'female'
     """
     if _enc_matrix is None or len(_enc_matrix) == 0:
         return []
 
-    # Select subset indices — STRICT: only the requested gender, no unknowns mixed in
+    # Select subset indices — STRICT: only the requested gender
     if gender_filter in ('male', 'female'):
         idx_list = _gender_index.get(gender_filter, [])
         if not idx_list:
@@ -94,12 +127,14 @@ def fast_match(query_encoding, top_k=5, gender_filter='any'):
     else:
         sub_matrix = _enc_matrix
         sub_criminals = all_criminals
-        subset_idx = None
 
-    distances = face_recognition.face_distance(sub_matrix, query_encoding)
+    # ── Cosine distance (ArcFace embeddings are pre-normalised) ───────────────
+    distances = _cosine_distances(sub_matrix, query_encoding)
+
     k = min(top_k, len(distances))
-    top_idx = np.argpartition(distances, k)[:k]
+    top_idx = np.argpartition(distances, k - 1)[:k]
     top_idx = top_idx[np.argsort(distances[top_idx])]
+
     results = []
     for idx in top_idx:
         c = sub_criminals[idx]
@@ -108,11 +143,13 @@ def fast_match(query_encoding, top_k=5, gender_filter='any'):
             rel_file = rel_file.split('dataset/', 1)[-1]
         else:
             rel_file = os.path.basename(c['filepath'])
+        dist = float(distances[idx])
         results.append({
             'id': c.get('id'),
             'name': c.get('name', os.path.basename(c['filepath'])),
             'file': rel_file,
-            'distance': float(distances[idx]),
+            'distance': dist,
+            'confidence': _confidence_score(dist),
             'gender': c.get('gender', 'unknown'),
         })
     return results
@@ -199,6 +236,10 @@ def save_composite():
     out_path = os.path.join(app.config['UPLOAD_FOLDER'], fname)
     with open(out_path, 'wb') as f:
         f.write(img_bytes)
+    
+    # Preprocess (handles transparent backgrounds, adds contrast & sharpens)
+    preprocess_image(out_path)
+    
     enc = get_face_encoding_from_image(out_path)
     if enc is None:
         # Record failed search in history
@@ -218,7 +259,8 @@ def save_composite():
     _search_counter += 1
     top = None
     if matches:
-        conf = max(0, min(100, round((1 - matches[0]['distance']) * 100, 1)))
+        # confidence already computed in fast_match (ArcFace calibrated)
+        conf = matches[0].get('confidence', 0)
         top = {'name': matches[0]['name'], 'confidence': conf}
     search_history.insert(0, {
         'id': f'SKT-{_search_counter:03d}',

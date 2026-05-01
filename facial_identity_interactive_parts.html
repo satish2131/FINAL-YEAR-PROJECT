@@ -1367,6 +1367,13 @@
             s.querySelectorAll('#eyes-group ellipse').forEach(e => { e.setAttribute('ry', '13'); e.setAttribute('rx', '24') });
           }
         },
+        {
+          name: 'Actor Gaze', draw: s => {
+            s.querySelector('#eye-group-l').setAttribute('transform', 'none');
+            s.querySelector('#eye-group-r').setAttribute('transform', 'none');
+            s.querySelectorAll('#eyes-group ellipse').forEach(e => { e.setAttribute('ry', '11'); e.setAttribute('rx', '22') });
+          }
+        },
       ]
     },
     brows: {
@@ -1475,6 +1482,12 @@
             s.querySelector('#mouth-bot').setAttribute('d', 'M125 258 Q160 288 195 258');
           }
         },
+        {
+          name: 'Actor Smile', draw: s => {
+            s.querySelector('#mouth-top').setAttribute('d', 'M120 255 Q160 240 200 255');
+            s.querySelector('#mouth-bot').setAttribute('d', 'M120 255 Q160 300 200 255');
+          }
+        },
       ]
     },
     ears: {
@@ -1524,6 +1537,7 @@
         { name: 'Wavy', draw: s => { s.querySelector('#hair').setAttribute('d', 'M58 180 Q40 100 160 50 Q280 100 262 180 Q270 220 250 250 Q280 290 260 350 L210 350 Q210 260 210 180 Q190 120 160 100 Q130 120 110 180 Q110 260 110 350 L60 350 Q40 290 70 250 Q50 220 58 180 Z'); s.querySelector('#hair').setAttribute('fill', '#222'); } },
         { name: 'Buzzcut', draw: s => { s.querySelector('#hair').setAttribute('d', 'M58 180 Q65 100 160 70 Q255 100 262 180 L250 140 Q210 100 160 100 Q110 100 70 140 Z'); s.querySelector('#hair').setAttribute('fill', 'rgba(34,34,34,0.6)'); } },
         { name: 'Bald', draw: s => { s.querySelector('#hair').setAttribute('d', 'M0 0'); } },
+        { name: 'Actor Swept', draw: s => { s.querySelector('#hair').setAttribute('d', 'M50 190 Q40 110 80 60 Q120 20 180 40 Q240 50 270 100 Q280 150 265 190 Q240 150 220 140 Q190 120 160 130 Q130 110 100 140 Q80 160 50 190 Z'); s.querySelector('#hair').setAttribute('fill', '#1a1717'); } },
       ]
     },
     pimples: {
@@ -1563,6 +1577,12 @@
               '<path d="M140 265 Q160 340 180 265 Q160 355 140 265Z" fill="#1e1616" opacity="0.88" filter="url(#shadow)"/><path d="M142 263 Q160 255 178 263 Q160 272 142 263Z" fill="#1e1616" opacity="0.9"/>';
           }
         },
+        {
+          name: 'Actor Thick', draw: s => {
+            s.querySelector('#beard-standalone-group').innerHTML =
+              '<path d=\"M78 245 Q160 380 242 245 Q200 320 160 330 Q120 320 78 245Z\" fill=\"#151010\" opacity=\"0.95\" filter=\"url(#shadow)\"/><path d=\"M115 240 Q160 220 205 240 Q160 275 115 240Z\" fill=\"#151010\" opacity=\"0.95\"/><path d=\"M70 175 Q80 220 85 255 L65 240Z\" fill=\"#151010\" opacity=\"0.95\"/><path d=\"M250 175 Q240 220 235 255 L255 240Z\" fill=\"#151010\" opacity=\"0.95\"/>';
+          }
+        },
       ]
     },
     mustache: {
@@ -1591,6 +1611,12 @@
           name: 'Handlebar', draw: s => {
             s.querySelector('#mustache-group').innerHTML =
               '<path d="M128 252 Q145 242 160 250 Q175 242 192 252 Q178 258 160 254 Q142 258 128 252Z" fill="#1a1212" opacity="0.9"/><path d="M128 252 Q112 248 108 238 Q116 248 128 252Z" fill="#1a1212" opacity="0.9"/><path d="M192 252 Q208 248 212 238 Q204 248 192 252Z" fill="#1a1212" opacity="0.9"/>';
+          }
+        },
+        {
+          name: 'Actor Stache', draw: s => {
+            s.querySelector('#mustache-group').innerHTML =
+              '<path d=\"M115 255 Q160 240 205 255 Q180 265 160 270 Q140 265 115 255Z\" fill=\"#151010\" opacity=\"0.95\"/>';
           }
         },
       ]
@@ -1732,7 +1758,8 @@
       eyes: ['<ellipse cx="22" cy="22" rx="16" ry="9" stroke="#00f0ff" stroke-width="1.5" fill="rgba(0,240,255,0.1)"/><circle cx="22" cy="22" r="5" fill="#00f0ff" opacity=".6"/><ellipse cx="54" cy="22" rx="16" ry="9" stroke="#00f0ff" stroke-width="1.5" fill="rgba(0,240,255,0.1)"/><circle cx="54" cy="22" r="5" fill="#00f0ff" opacity=".6"/>',
         '<ellipse cx="22" cy="22" rx="12" ry="12" stroke="#00f0ff" stroke-width="1.5" fill="rgba(0,240,255,0.1)"/><circle cx="22" cy="22" r="5" fill="#00f0ff" opacity=".6"/><ellipse cx="54" cy="22" rx="12" ry="12" stroke="#00f0ff" stroke-width="1.5" fill="rgba(0,240,255,0.1)"/><circle cx="54" cy="22" r="5" fill="#00f0ff" opacity=".6"/>',
         '<ellipse cx="22" cy="22" rx="18" ry="6" stroke="#00f0ff" stroke-width="1.5" fill="rgba(0,240,255,0.1)"/><circle cx="22" cy="22" r="4" fill="#00f0ff" opacity=".6"/><ellipse cx="54" cy="22" rx="18" ry="6" stroke="#00f0ff" stroke-width="1.5" fill="rgba(0,240,255,0.1)"/><circle cx="54" cy="22" r="4" fill="#00f0ff" opacity=".6"/>',
-        '<ellipse cx="15" cy="22" rx="12" ry="9" stroke="#00f0ff" stroke-width="1.5" fill="rgba(0,240,255,0.1)"/><circle cx="15" cy="22" r="5" fill="#00f0ff" opacity=".6"/><ellipse cx="61" cy="22" rx="12" ry="9" stroke="#00f0ff" stroke-width="1.5" fill="rgba(0,240,255,0.1)"/><circle cx="61" cy="22" r="5" fill="#00f0ff" opacity=".6"/>'],
+        '<ellipse cx="15" cy="22" rx="12" ry="9" stroke="#00f0ff" stroke-width="1.5" fill="rgba(0,240,255,0.1)"/><circle cx="15" cy="22" r="5" fill="#00f0ff" opacity=".6"/><ellipse cx="61" cy="22" rx="12" ry="9" stroke="#00f0ff" stroke-width="1.5" fill="rgba(0,240,255,0.1)"/><circle cx="61" cy="22" r="5" fill="#00f0ff" opacity=".6"/>',
+        '<ellipse cx="22" cy="22" rx="14" ry="7" stroke="#00f0ff" stroke-width="1.5" fill="rgba(0,240,255,0.1)"/><circle cx="22" cy="22" r="4.5" fill="#00f0ff" opacity=".6"/><ellipse cx="54" cy="22" rx="14" ry="7" stroke="#00f0ff" stroke-width="1.5" fill="rgba(0,240,255,0.1)"/><circle cx="54" cy="22" r="4.5" fill="#00f0ff" opacity=".6"/>'],
       brows: ['<path d="M8 28 Q22 22 36 28 Q22 18 8 28 Z" fill="#322c2a"/><path d="M40 28 Q54 22 68 28 Q54 18 40 28 Z" fill="#322c2a"/>',
         '<path d="M8 24 Q22 20 36 24 Q22 16 8 24 Z" fill="#322c2a"/><path d="M40 24 Q54 20 68 24 Q54 16 40 24 Z" fill="#322c2a"/>',
         '<path d="M6 30 Q22 22 38 30 Q22 14 6 30 Z" fill="#322c2a"/><path d="M40 30 Q56 22 72 30 Q56 14 40 30 Z" fill="#322c2a"/>',
@@ -1750,7 +1777,8 @@
       mouth: ['<path d="M16 18 Q38 10 60 18" stroke="#00f0ff" stroke-width="1" fill="none" stroke-linecap="round"/><path d="M16 18 Q38 32 60 18" stroke="#00f0ff" stroke-width="1.5" fill="rgba(0,240,255,0.07)" stroke-linecap="round"/>',
         '<path d="M12 16 Q38 6 64 16" stroke="#00f0ff" stroke-width="1" fill="none" stroke-linecap="round"/><path d="M12 16 Q38 36 64 16" stroke="#00f0ff" stroke-width="1.5" fill="rgba(0,240,255,0.07)" stroke-linecap="round"/>',
         '<path d="M20 20 Q38 14 56 20" stroke="#00f0ff" stroke-width="1" fill="none" stroke-linecap="round"/><path d="M20 20 Q38 28 56 20" stroke="#00f0ff" stroke-width="1.5" fill="rgba(0,240,255,0.07)" stroke-linecap="round"/>',
-        '<path d="M10 16 Q38 4 66 16" stroke="#00f0ff" stroke-width="1" fill="none" stroke-linecap="round"/><path d="M10 16 Q38 38 66 16" stroke="#00f0ff" stroke-width="1.5" fill="rgba(0,240,255,0.07)" stroke-linecap="round"/>'],
+        '<path d="M10 16 Q38 4 66 16" stroke="#00f0ff" stroke-width="1" fill="none" stroke-linecap="round"/><path d="M10 16 Q38 38 66 16" stroke="#00f0ff" stroke-width="1.5" fill="rgba(0,240,255,0.07)" stroke-linecap="round"/>',
+        '<path d="M8 12 Q38 0 68 12" stroke="#00f0ff" stroke-width="1" fill="none" stroke-linecap="round"/><path d="M8 12 Q38 42 68 12" stroke="#00f0ff" stroke-width="1.5" fill="rgba(0,240,255,0.07)" stroke-linecap="round"/>'],
       ears: ['<path d="M30 8 Q18 22 30 38" stroke="#00f0ff" stroke-width="1.5" fill="none" stroke-linecap="round"/>',
         '<path d="M30 5 Q12 22 30 42" stroke="#00f0ff" stroke-width="1.5" fill="none" stroke-linecap="round"/>',
         '<path d="M30 14 Q22 22 30 32" stroke="#00f0ff" stroke-width="1.5" fill="none" stroke-linecap="round"/>',
@@ -1764,7 +1792,8 @@
         '<path d="M4 28 Q0 10 20 6 Q30 2 38 4 Q46 2 56 6 Q76 10 72 28 Q62 18 52 22 Q44 14 38 20 Q32 14 24 22 Q14 18 4 28Z" stroke="#111" stroke-width="1.5" fill="#222"/>',
         '<path d="M4 28 Q0 10 38 4 Q74 10 72 28 Q68 36 60 44 L48 44 Q52 26 44 18 Q38 12 32 18 Q24 26 28 44 L16 44 Q8 36 4 28Z" stroke="#111" stroke-width="1.5" fill="#222" stroke-linecap="round"/>',
         '<path d="M4 28 Q12 10 38 8 Q64 10 72 28 L66 22 Q48 16 38 16 Q28 16 10 22 Z" stroke="#none" fill="rgba(34,34,34,0.6)"/>',
-        '<path d="M4 28 Q38 22 72 28" stroke="#00f0ff" stroke-width="1.5" fill="none" stroke-linecap="round"/>'],
+        '<path d="M4 28 Q38 22 72 28" stroke="#00f0ff" stroke-width="1.5" fill="none" stroke-linecap="round"/>',
+        '<path d="M4 28 Q0 5 38 4 Q76 8 72 28 C64 20 60 18 52 22 C44 14 38 20 32 14 C24 22 20 18 4 28Z" stroke="#111" stroke-width="1.5" fill="#222" stroke-linecap="round"/>'],
       pimples: [
         '',
         '<circle cx="30" cy="28" r="2" fill="#ff0055"/><circle cx="50" cy="20" r="1.5" fill="#ff0055"/><circle cx="38" cy="12" r="2" fill="#ff0055"/>',
@@ -1781,7 +1810,8 @@
         // Full
         '<path d="M4 16 Q38 44 72 16 Q50 40 38 44 Q26 40 4 16Z" fill="#1a1212" opacity="0.92"/><path d="M18 14 Q38 6 58 14 Q38 20 18 14Z" fill="#1a1212" opacity="0.95"/>',
         // Goatee
-        '<path d="M30 20 Q38 42 46 20 Q38 46 30 20Z" fill="#1e1616" opacity="0.9"/><path d="M28 18 Q38 12 48 18 Q38 24 28 18Z" fill="#1e1616" opacity="0.9"/>'
+        '<path d="M30 20 Q38 42 46 20 Q38 46 30 20Z" fill="#1e1616" opacity="0.9"/><path d="M28 18 Q38 12 48 18 Q38 24 28 18Z" fill="#1e1616" opacity="0.9"/>',
+        '<path d="M2 14 Q38 46 74 14 Q50 36 38 40 Q26 36 2 14Z" fill="#1a1212" opacity="0.95"/><path d="M16 12 Q38 4 60 12 Q38 18 16 12Z" fill="#1a1212" opacity="0.95"/>'
       ],
       mustache: [
         // None
@@ -1793,7 +1823,8 @@
         // Walrus
         '<path d="M10 18 Q28 8 38 14 Q48 8 66 18 Q52 28 38 32 Q24 28 10 18Z" fill="#1a1212" opacity="0.92"/>',
         // Handlebar
-        '<path d="M16 18 Q28 10 38 16 Q48 10 60 18 Q50 22 38 18 Q26 22 16 18Z" fill="#1a1212" opacity="0.9"/><path d="M16 18 Q6 14 4 6 Q10 14 16 18Z" fill="#1a1212" opacity="0.9"/><path d="M60 18 Q70 14 72 6 Q66 14 60 18Z" fill="#1a1212" opacity="0.9"/>'
+        '<path d="M16 18 Q28 10 38 16 Q48 10 60 18 Q50 22 38 18 Q26 22 16 18Z" fill="#1a1212" opacity="0.9"/><path d="M16 18 Q6 14 4 6 Q10 14 16 18Z" fill="#1a1212" opacity="0.9"/><path d="M60 18 Q70 14 72 6 Q66 14 60 18Z" fill="#1a1212" opacity="0.9"/>',
+        '<path d="M10 18 Q28 6 38 12 Q48 6 66 18 Q52 24 38 28 Q24 24 10 18Z" fill="#1a1212" opacity="0.95"/>'
       ],
       skin: [
         '<rect x="20" y="10" width="36" height="24" rx="4" fill="rgba(0,240,255,0.03)" stroke="#00f0ff" stroke-width="1"/>',
@@ -1852,7 +1883,7 @@
     }
   }
 
-  function exportComposite() {
+  function exportComposite(iv) {
     const svgEl = document.getElementById('facesvg');
     const serializer = new XMLSerializer();
     const svgStr = serializer.serializeToString(svgEl);
@@ -1875,6 +1906,8 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ image: data, gender: genderFilter })
       }).then(r => r.json()).then(resp => {
+        // Fetch complete — stop progress bar and move to 100%
+        if (iv) clearInterval(iv);
         document.getElementById('ppct').textContent = 'DONE';
         document.getElementById('pfill').style.width = '100%';
 
@@ -1885,7 +1918,8 @@
           window._matches = resp.matches;
           let html = `<div class="r-label" style="text-align:center;">TOP MATCHES <span style="font-size:9px;background:rgba(0,240,255,0.15);padding:2px 8px;border-radius:3px;border:1px solid var(--border);margin-left:8px;letter-spacing:1px;">${genderLabel}</span></div>`;
           resp.matches.forEach((m, i) => {
-            const conf = Math.max(0, Math.min(100, Math.round((1 - m.distance) * 100)));
+            // Use server-calibrated ArcFace confidence directly
+            const conf = Math.round(m.confidence ?? Math.max(0, Math.min(100, (1 - m.distance) * 100)));
             html += `
           <div onclick="openModal(window._matches[${i}], ${i + 1})" style="background:rgba(0,0,0,0.3);border:1px solid var(--border);border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:all .25s;position:relative;overflow:hidden;" onmouseover="this.style.borderColor='rgba(0,240,255,0.4)';this.style.transform='translateY(-2px)';" onmouseout="this.style.borderColor='rgba(0,240,255,0.15)';this.style.transform='none';">
             <div style="position:relative;flex-shrink:0;">
@@ -1902,14 +1936,20 @@
           });
           resContainer.innerHTML = html;
         }
-      }).catch(err => { alert('Search failed: ' + err); });
+      }).catch(err => {
+        if (iv) clearInterval(iv);
+        document.getElementById('ppct').textContent = 'ERROR';
+        document.getElementById('pfill').style.width = '0%';
+        document.getElementById('match-results').innerHTML = `<div style="color:var(--danger);font-size:12px;text-align:center;padding:16px;">Search failed: ${err}</div>`;
+      });
     };
     img.onerror = function () { alert('Failed to rasterize SVG'); };
     img.src = url;
   }
 
   function openModal(m, rank) {
-    const conf = Math.max(0, Math.min(100, Math.round((1 - m.distance) * 100)));
+    // Use server-calibrated ArcFace confidence; fallback to distance formula
+    const conf = Math.round(m.confidence ?? Math.max(0, Math.min(100, (1 - m.distance) * 100)));
     const similarity = ((1 - m.distance) * 100).toFixed(2);
     const rankLabels = ['1ST', '2ND', '3RD', '4TH', '5TH'];
     const confLabels = [
@@ -1972,11 +2012,11 @@
     fill.style.width = '0%'; let v = 0;
     const iv = setInterval(() => {
       v += Math.floor(Math.random() * 7) + 3;
-      if (v >= 90) { v = 90; }
+      if (v >= 90) { v = 90; clearInterval(iv); }  // stop at 90%, wait for server
       fill.style.width = v + '%';
       pct.textContent = v + '%';
     }, 100);
-    setTimeout(() => exportComposite(), 500);
+    setTimeout(() => exportComposite(iv), 500);  // pass iv so fetch can clear it
   }
 
   renderVariants('eyes');
